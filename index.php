@@ -217,43 +217,53 @@
             }
         });
 
+        // Helper functions - Global untuk digunakan di berbagai tempat
+        function formatDate(date) {
+            if (!date) return '-';
+            const d = new Date(date);
+            return d.toLocaleDateString('id-ID', { day: '2-digit', month: 'long', year: 'numeric' });
+        }
+
+        function formatTime(datetime) {
+            if (!datetime) return '-';
+            const d = new Date(datetime);
+            return d.toLocaleString('id-ID', { 
+                day: '2-digit', 
+                month: 'long', 
+                year: 'numeric',
+                hour: '2-digit',
+                minute: '2-digit'
+            });
+        }
+
+        function getFieldLabel(fieldName) {
+            const fieldLabels = {
+                'nik_kk': 'NIK pada KK',
+                'nama_kk': 'Nama pada KK',
+                'tempat_lahir_kk': 'Tempat Lahir pada KK',
+                'tanggal_lahir_kk': 'Tanggal Lahir pada KK',
+                'jenis_kelamin_kk': 'Jenis Kelamin pada KK',
+                'nama_ibu_kk': 'Nama Ibu Kandung pada KK',
+                'nama_ayah_kk': 'Nama Ayah Kandung pada KK',
+                'nisn': 'NISN',
+                'nama_ijazah': 'Nama pada Ijazah',
+                'tempat_lahir_ijazah': 'Tempat Lahir pada Ijazah',
+                'tanggal_lahir_ijazah': 'Tanggal Lahir pada Ijazah',
+                'jenis_kelamin_ijazah': 'Jenis Kelamin pada Ijazah',
+                'nama_ayah_ijazah': 'Nama Ayah Kandung pada Ijazah',
+                'jenjang_sebelumnya': 'Jenjang Sebelumnya',
+                'nama_sekolah_asal': 'Nama Sekolah Asal',
+                'npsn_sekolah_asal': 'NPSN Sekolah Asal',
+                'nomor_peserta_un': 'Nomor Peserta UN',
+                'nomor_seri_ijazah': 'Nomor Seri Ijazah',
+                'nomor_seri_skhun': 'Nomor Seri SKHUN',
+                'tahun_lulus': 'Tahun Lulus'
+            };
+            return fieldLabels[fieldName] || fieldName;
+        }
+
         function buildDataViewHTML(siswa) {
             // Halaman read-only untuk siswa yang sudah verval
-            const formatDate = (date) => {
-                if (!date) return '-';
-                const d = new Date(date);
-                return d.toLocaleDateString('id-ID', { day: '2-digit', month: 'long', year: 'numeric' });
-            };
-
-            const formatTime = (datetime) => {
-                if (!datetime) return '-';
-                const d = new Date(datetime);
-                return d.toLocaleString('id-ID', { 
-                    day: '2-digit', 
-                    month: 'long', 
-                    year: 'numeric',
-                    hour: '2-digit',
-                    minute: '2-digit'
-                });
-            };
-
-            const getFieldLabel = (fieldName) => {
-                const fieldLabels = {
-                    'nik_kk': 'NIK pada KK',
-                    'nama_kk': 'Nama pada KK',
-                    'tempat_lahir_kk': 'Tempat Lahir pada KK',
-                    'tanggal_lahir_kk': 'Tanggal Lahir pada KK',
-                    'jenis_kelamin_kk': 'Jenis Kelamin pada KK',
-                    'nama_ibu_kk': 'Nama Ibu Kandung pada KK',
-                    'nama_ayah_kk': 'Nama Ayah Kandung pada KK',
-                    'nama_ijazah': 'Nama pada Ijazah',
-                    'tempat_lahir_ijazah': 'Tempat Lahir pada Ijazah',
-                    'tanggal_lahir_ijazah': 'Tanggal Lahir pada Ijazah',
-                    'jenis_kelamin_ijazah': 'Jenis Kelamin pada Ijazah',
-                    'nama_ayah_ijazah': 'Nama Ayah Kandung pada Ijazah'
-                };
-                return fieldLabels[fieldName] || fieldName;
-            };
 
             let html = `
                 <div class="alert alert-success" style="margin-bottom: 30px;">
@@ -432,9 +442,9 @@
                             <table style="width: 100%; border-collapse: collapse;">
                                 <thead>
                                     <tr style="background: #f5f7fa;">
-                                        <th style="padding: 12px; text-align: left; border-bottom: 2px solid #ddd;">Field</th>
-                                        <th style="padding: 12px; text-align: left; border-bottom: 2px solid #ddd;">Nilai Sebelum</th>
-                                        <th style="padding: 12px; text-align: left; border-bottom: 2px solid #ddd;">Nilai Sesudah</th>
+                                        <th style="padding: 12px; text-align: left; border-bottom: 2px solid #ddd;">Data Perbaikan</th>
+                                        <th style="padding: 12px; text-align: left; border-bottom: 2px solid #ddd;">Sebelumnya</th>
+                                        <th style="padding: 12px; text-align: left; border-bottom: 2px solid #ddd;">Menjadi</th>
                                         <th style="padding: 12px; text-align: left; border-bottom: 2px solid #ddd;">Tanggal Perbaikan</th>
                                     </tr>
                                 </thead>
@@ -691,8 +701,6 @@
                         </div>
                 </div>
                 </form>
-
-                ${siswa.history_perbaikan && siswa.history_perbaikan.length > 0 ? buildHistoryHTML(siswa.history_perbaikan) : ''}
             `;
 
             return html;
@@ -720,7 +728,7 @@
             history.forEach(item => {
                 html += `
                             <tr>
-                                <td><strong>${item.field_name}</strong></td>
+                                <td><strong>${getFieldLabel(item.field_name)}</strong></td>
                                 <td>${item.nilai_sebelum || '-'}</td>
                                 <td>${item.nilai_sesudah || '-'}</td>
                                 <td>${formatTime(item.tanggal_perbaikan)}</td>
