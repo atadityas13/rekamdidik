@@ -126,20 +126,20 @@
                             </thead>
                             <tbody>
                                 <tr>
-                                    <td class="compare-label" data-label="Field">NIK</td>
-                                    <td class="compare-cell" data-label="Data KK">
+                                    <td class="compare-label" data-label="">NIK</td>
+                                    <td class="compare-cell" data-label="Data pada Kartu Keluarga">
                                         <input type="text" id="nik_kk" value="${siswa.nik_kk || ''}" class="data-input" data-field="nik_kk" ${disableAttr(siswa.nik_kk_verified)}>
                                         <div class="checkbox-group compact">
                                             <input type="checkbox" class="verify-checkbox" data-verify-field="nik_kk_verified" data-target-input="nik_kk" ${checkedAttr(siswa.nik_kk_verified)}>
                                             <label>Sudah sesuai</label>
                                         </div>
                                     </td>
-                                    <td class="compare-cell muted" data-label="Data Ijazah">-</td>
+                                    <td class="compare-cell muted" data-label="Data pada Ijazah">-</td>
                                 </tr>
                                 <tr>
-                                    <td class="compare-label" data-label="Field">NISN</td>
-                                    <td class="compare-cell muted" data-label="Data KK">-</td>
-                                    <td class="compare-cell" data-label="Data Ijazah">
+                                    <td class="compare-label" data-label="">NISN</td>
+                                    <td class="compare-cell muted" data-label="Data pada Kartu Keluarga">-</td>
+                                    <td class="compare-cell" data-label="Data pada Ijazah">
                                         <input type="text" id="nisn_ijazah" value="${siswa.nisn}" disabled>
                                         <div class="checkbox-group compact">
                                             <input type="checkbox" class="verify-checkbox" data-verify-field="nisn_verified" data-target-input="nisn_ijazah" ${checkedAttr(siswa.nisn_verified)}>
@@ -148,15 +148,15 @@
                                     </td>
                                 </tr>
                                 <tr>
-                                    <td class="compare-label" data-label="Field">Nama</td>
-                                    <td class="compare-cell" data-label="Data KK">
+                                    <td class="compare-label" data-label="">Nama</td>
+                                    <td class="compare-cell" data-label="Data pada Kartu Keluarga">
                                         <input type="text" id="nama_kk" value="${siswa.nama_kk || ''}" class="data-input" data-field="nama_kk" ${disableAttr(siswa.nama_kk_verified)}>
                                         <div class="checkbox-group compact">
                                             <input type="checkbox" class="verify-checkbox" data-verify-field="nama_kk_verified" data-target-input="nama_kk" ${checkedAttr(siswa.nama_kk_verified)}>
                                             <label>Sudah sesuai</label>
                                         </div>
                                     </td>
-                                    <td class="compare-cell" data-label="Data Ijazah">
+                                    <td class="compare-cell" data-label="Data pada Ijazah">
                                         <input type="text" id="nama_ijazah" value="${siswa.nama_ijazah || ''}" class="data-input" data-field="nama_ijazah" ${disableAttr(siswa.nama_ijazah_verified)}>
                                         <div class="checkbox-group compact">
                                             <input type="checkbox" class="verify-checkbox" data-verify-field="nama_ijazah_verified" data-target-input="nama_ijazah" ${checkedAttr(siswa.nama_ijazah_verified)}>
@@ -165,15 +165,15 @@
                                     </td>
                                 </tr>
                                 <tr>
-                                    <td class="compare-label" data-label="Field">Tempat Lahir</td>
-                                    <td class="compare-cell" data-label="Data KK">
+                                    <td class="compare-label" data-label="">Tempat Lahir</td>
+                                    <td class="compare-cell" data-label="Data pada Kartu Keluarga">
                                         <input type="text" id="tempat_lahir_kk" value="${siswa.tempat_lahir_kk || ''}" class="data-input" data-field="tempat_lahir_kk" ${disableAttr(siswa.tempat_lahir_kk_verified)}>
                                         <div class="checkbox-group compact">
                                             <input type="checkbox" class="verify-checkbox" data-verify-field="tempat_lahir_kk_verified" data-target-input="tempat_lahir_kk" ${checkedAttr(siswa.tempat_lahir_kk_verified)}>
                                             <label>Sudah sesuai</label>
                                         </div>
                                     </td>
-                                    <td class="compare-cell" data-label="Data Ijazah">
+                                    <td class="compare-cell" data-label="Data pada Ijazah">
                                         <input type="text" id="tempat_lahir_ijazah" value="${siswa.tempat_lahir_ijazah || ''}" class="data-input" data-field="tempat_lahir_ijazah" ${disableAttr(siswa.tempat_lahir_ijazah_verified)}>
                                         <div class="checkbox-group compact">
                                             <input type="checkbox" class="verify-checkbox" data-verify-field="tempat_lahir_ijazah_verified" data-target-input="tempat_lahir_ijazah" ${checkedAttr(siswa.tempat_lahir_ijazah_verified)}>
@@ -182,15 +182,15 @@
                                     </td>
                                 </tr>
                                 <tr>
-                                    <td class="compare-label" data-label="Field">Tanggal Lahir</td>
-                                    <td class="compare-cell" data-label="Data KK">
+                                    <td class="compare-label" data-label="">Tanggal Lahir</td>
+                                    <td class="compare-cell" data-label="Data pada Kartu Keluarga">
                                         <input type="date" id="tanggal_lahir_kk" value="${siswa.tanggal_lahir_kk || ''}" class="data-input" data-field="tanggal_lahir_kk" ${disableAttr(siswa.tanggal_lahir_kk_verified)}>
                                         <div class="checkbox-group compact">
                                             <input type="checkbox" class="verify-checkbox" data-verify-field="tanggal_lahir_kk_verified" data-target-input="tanggal_lahir_kk" ${checkedAttr(siswa.tanggal_lahir_kk_verified)}>
                                             <label>Sudah sesuai</label>
                                         </div>
                                     </td>
-                                    <td class="compare-cell" data-label="Data Ijazah">
+                                    <td class="compare-cell" data-label="Data pada Ijazah">
                                         <input type="date" id="tanggal_lahir_ijazah" value="${siswa.tanggal_lahir_ijazah || ''}" class="data-input" data-field="tanggal_lahir_ijazah" ${disableAttr(siswa.tanggal_lahir_ijazah_verified)}>
                                         <div class="checkbox-group compact">
                                             <input type="checkbox" class="verify-checkbox" data-verify-field="tanggal_lahir_ijazah_verified" data-target-input="tanggal_lahir_ijazah" ${checkedAttr(siswa.tanggal_lahir_ijazah_verified)}>
@@ -199,8 +199,8 @@
                                     </td>
                                 </tr>
                                 <tr>
-                                    <td class="compare-label" data-label="Field">Jenis Kelamin</td>
-                                    <td class="compare-cell" data-label="Data KK">
+                                    <td class="compare-label" data-label="">Jenis Kelamin</td>
+                                    <td class="compare-cell" data-label="Data pada Kartu Keluarga">
                                         <select id="jenis_kelamin_kk" class="data-input" data-field="jenis_kelamin_kk" ${disableAttr(siswa.jenis_kelamin_kk_verified)}>
                                             <option value="">-- Pilih --</option>
                                             <option value="L" ${siswa.jenis_kelamin_kk === 'L' ? 'selected' : ''}>Laki-laki</option>
@@ -211,7 +211,7 @@
                                             <label>Sudah sesuai</label>
                                         </div>
                                     </td>
-                                    <td class="compare-cell" data-label="Data Ijazah">
+                                    <td class="compare-cell" data-label="Data pada Ijazah">
                                         <select id="jenis_kelamin_ijazah" class="data-input" data-field="jenis_kelamin_ijazah" ${disableAttr(siswa.jenis_kelamin_ijazah_verified)}>
                                             <option value="">-- Pilih --</option>
                                             <option value="L" ${siswa.jenis_kelamin_ijazah === 'L' ? 'selected' : ''}>Laki-laki</option>
@@ -224,26 +224,26 @@
                                     </td>
                                 </tr>
                                 <tr>
-                                    <td class="compare-label" data-label="Field">Nama Ibu Kandung</td>
-                                    <td class="compare-cell" data-label="Data KK">
+                                    <td class="compare-label" data-label="">Nama Ibu Kandung</td>
+                                    <td class="compare-cell" data-label="Data pada Kartu Keluarga">
                                         <input type="text" id="nama_ibu_kk" value="${siswa.nama_ibu_kk || ''}" class="data-input" data-field="nama_ibu_kk" ${disableAttr(siswa.nama_ibu_kk_verified)}>
                                         <div class="checkbox-group compact">
                                             <input type="checkbox" class="verify-checkbox" data-verify-field="nama_ibu_kk_verified" data-target-input="nama_ibu_kk" ${checkedAttr(siswa.nama_ibu_kk_verified)}>
                                             <label>Sudah sesuai</label>
                                         </div>
                                     </td>
-                                    <td class="compare-cell muted" data-label="Data Ijazah">-</td>
+                                    <td class="compare-cell muted" data-label="Data pada Ijazah">-</td>
                                 </tr>
                                 <tr>
-                                    <td class="compare-label" data-label="Field">Nama Ayah Kandung</td>
-                                    <td class="compare-cell" data-label="Data KK">
+                                    <td class="compare-label" data-label="">Nama Ayah Kandung</td>
+                                    <td class="compare-cell" data-label="Data pada Kartu Keluarga">
                                         <input type="text" id="nama_ayah_kk" value="${siswa.nama_ayah_kk || ''}" class="data-input" data-field="nama_ayah_kk" ${disableAttr(siswa.nama_ayah_kk_verified)}>
                                         <div class="checkbox-group compact">
                                             <input type="checkbox" class="verify-checkbox" data-verify-field="nama_ayah_kk_verified" data-target-input="nama_ayah_kk" ${checkedAttr(siswa.nama_ayah_kk_verified)}>
                                             <label>Sudah sesuai</label>
                                         </div>
                                     </td>
-                                    <td class="compare-cell" data-label="Data Ijazah">
+                                    <td class="compare-cell" data-label="Data pada Ijazah">
                                         <input type="text" id="nama_ayah_ijazah" value="${siswa.nama_ayah_ijazah || ''}" class="data-input" data-field="nama_ayah_ijazah" ${disableAttr(siswa.nama_ayah_ijazah_verified)}>
                                         <div class="checkbox-group compact">
                                             <input type="checkbox" class="verify-checkbox" data-verify-field="nama_ayah_ijazah_verified" data-target-input="nama_ayah_ijazah" ${checkedAttr(siswa.nama_ayah_ijazah_verified)}>
