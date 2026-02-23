@@ -216,53 +216,43 @@ function buildFieldActions(siswaId, fieldName, fieldStatus, isBagianA = false, i
         return '<div style="text-align: center; padding: 10px; color: #4caf50; font-weight: 600;">✓ Field ini sudah disetujui</div>';
     }
 
-    const buttons = [];
+    let html = `<div style="display: flex; gap: 8px; margin-top: 10px; flex-wrap: wrap;">`;
     
-    // Tombol 1: Setujui (ada di SEMUA field - Bagian A, B, dan Ijazah)
-    buttons.push(`
-        <button onclick="konfirmasiField(${siswaId}, '${fieldName}', 'approve')" 
-                class="btn-small" 
-                style="background: #4caf50; color: white; padding: 8px 12px; border: none; border-radius: 4px; cursor: pointer; font-size: 12px; font-weight: 500; min-width: 100px;">
+    // Tombol 1: Setujui (ada di SEMUA field)
+    html += `
+        <button onclick="konfirmasiField(${siswaId}, '${fieldName}', 'approve')" style="background: #4caf50; color: white; padding: 8px 12px; border: none; border-radius: 4px; cursor: pointer; font-size: 12px; font-weight: 500;">
             ✓ Setujui
         </button>
-    `);
+    `;
     
-    // Tombol 2: Minta Berkas (HANYA untuk Bagian A - JANGAN untuk Bagian B)
+    // Tombol 2: Minta Berkas (HANYA untuk Bagian A)
     if (isBagianA && !isBagianB) {
-        buttons.push(`
-            <button onclick="konfirmasiField(${siswaId}, '${fieldName}', 'need_document')" 
-                    class="btn-small" 
-                    style="background: #ff9800; color: white; padding: 8px 12px; border: none; border-radius: 4px; cursor: pointer; font-size: 12px; font-weight: 500; min-width: 100px;">
+        html += `
+            <button onclick="konfirmasiField(${siswaId}, '${fieldName}', 'need_document')" style="background: #ff9800; color: white; padding: 8px 12px; border: none; border-radius: 4px; cursor: pointer; font-size: 12px; font-weight: 500;">
                 📄 Berkas
             </button>
-        `);
+        `;
     }
     
-    // Tombol 3: Minta Konfirmasi (ada di SEMUA - Bagian A dan B)
-    buttons.push(`
-        <button onclick="konfirmasiField(${siswaId}, '${fieldName}', 'need_confirmation')" 
-                class="btn-small" 
-                style="background: #2196f3; color: white; padding: 8px 12px; border: none; border-radius: 4px; cursor: pointer; font-size: 12px; font-weight: 500; min-width: 100px;">
+    // Tombol 3: Minta Konfirmasi (ada di SEMUA)
+    html += `
+        <button onclick="konfirmasiField(${siswaId}, '${fieldName}', 'need_confirmation')" style="background: #2196f3; color: white; padding: 8px 12px; border: none; border-radius: 4px; cursor: pointer; font-size: 12px; font-weight: 500;">
             💬 Konfirmasi
         </button>
-    `);
+    `;
     
-    // Tombol 4: Minta Edit (ada di SEMUA - Bagian A dan B)
-    buttons.push(`
-        <button onclick="konfirmasiField(${siswaId}, '${fieldName}', 'need_edit')" 
-                class="btn-small" 
-                style="background: #9c27b0; color: white; padding: 8px 12px; border: none; border-radius: 4px; cursor: pointer; font-size: 12px; font-weight: 500; min-width: 100px;">
+    // Tombol 4: Minta Edit (ada di SEMUA)
+    html += `
+        <button onclick="konfirmasiField(${siswaId}, '${fieldName}', 'need_edit')" style="background: #9c27b0; color: white; padding: 8px 12px; border: none; border-radius: 4px; cursor: pointer; font-size: 12px; font-weight: 500;">
             ✏️ Edit
         </button>
-    `);
-    
-    console.log(`buildFieldActions - ${fieldName} (A:${isBagianA}, B:${isBagianB}) - ${buttons.length} tombol`);
-
-    return `
-        <div style="display: flex; gap: 8px; margin-top: 10px; flex-wrap: wrap; align-items: center;">
-            ${buttons.join('')}
-        </div>
     `;
+    
+    html += `</div>`;
+    
+    console.log(`buildFieldActions - ${fieldName} (A:${isBagianA}, B:${isBagianB}) - ${isBagianA ? 4 : 3} tombol`);
+    
+    return html;
 }
 
 /**
