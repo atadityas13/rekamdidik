@@ -296,7 +296,7 @@
 
                         <div class="form-group">
                             <label for="dokumen_ijazah">Upload Dokumen Ijazah Asli (JPG, JPEG, PNG - Max 1MB)</label>
-                            <h4><b>*Wajib upload hasil scan Ijazah Asli</b>/h4>
+                            <h4><b>*Wajib upload hasil scan Ijazah Asli</b></h4>
                             <input type="file" id="dokumen_ijazah" name="dokumen_ijazah" accept=".jpg,.jpeg,.png" required>
                             ${siswa.verval_data?.dokumen_ijazah ? `<small style="color: #666; margin-top: 5px; display: block;">📎 File saat ini: ${siswa.verval_data.dokumen_ijazah}</small>` : ''}
                         </div>
