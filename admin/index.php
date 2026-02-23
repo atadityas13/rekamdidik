@@ -569,9 +569,13 @@ if (!isset($_SESSION['logged_in']) || $_SESSION['logged_in'] !== true) {
                             }
                             
                             const nama = siswa.nama_kk || siswa.nama_ijazah || '-';
-                            const ijazahLink = siswa.dokumen_ijazah 
-                                ? `<a href="../uploads/ijazah/${siswa.dokumen_ijazah}" target="_blank" style="color: #667eea; margin-right: 10px;">👁 Lihat</a><a href="../uploads/ijazah/${siswa.dokumen_ijazah}" download style="color: #667eea;">⬇️ Download</a>`
-                                : '<span style="color: #999;">-</span>';
+                            let ijazahLink = '<span style="color: #999;">-</span>';
+                            if (siswa.dokumen_ijazah) {
+                                ijazahLink = `<a href="../uploads/ijazah/${siswa.dokumen_ijazah}" target="_blank" style="color: #667eea; margin-right: 10px;">👁 Lihat</a>`;
+                                if (siswa.verval_approval_status) {
+                                    ijazahLink += `<a href="../uploads/ijazah/${siswa.dokumen_ijazah}" download style="color: #667eea;">⬇️ Download</a>`;
+                                }
+                            }
 
                             // Build action buttons
                             let actionButtons = `<button class="btn-small btn-view" onclick="viewDetail(${siswa.id})" style="font-size: 11px; padding: 5px 8px;">👁 Lihat Data</button>`;

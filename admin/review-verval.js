@@ -116,7 +116,7 @@ function buildReviewModal(data) {
     `;
 
     // Fields List
-    buildFieldsList(siswa, konfirmasi);
+    buildFieldsList(siswa, konfirmasi, result.data.bagian_a_fields, result.data.bagian_b_fields);
 
     // Additional Actions (Upload Ulang Ijazah)
     buildAdditionalActions(siswa);
@@ -128,7 +128,7 @@ function buildReviewModal(data) {
 /**
  * Build fields list with enhanced status
  */
-function buildFieldsList(siswa, konfirmasi) {
+function buildFieldsList(siswa, konfirmasi, bagianAFields = [], bagianBFields = []) {
     const container = document.getElementById('reviewFieldsList');
     let html = '';
 
@@ -136,9 +136,16 @@ function buildFieldsList(siswa, konfirmasi) {
         const fieldValue = getFieldValue(siswa, fieldName);
         const statusBadge = getStatusBadge(fieldStatus.status);
         const typeBadge = fieldStatus.tipe_konfirmasi ? getTypeBadge(fieldStatus.tipe_konfirmasi) : '';
+        
+        // Tentukan apakah field dari Bagian A atau B
+        const isBagianA = bagianAFields.includes(fieldName);
+        const isBagianB = bagianBFields.includes(fieldName);
+        const bagianLabel = isBagianA ? '📋 Bagian A (KK/Ijazah)' : isBagianB ? '🏫 Bagian B (Data SD)' : '';
 
         html += `
             <div style="border-bottom: 1px solid #eee; padding: 15px; background: ${getFieldBgColor(fieldStatus.status)};">
+                ${bagianLabel ? `<div style="font-size: 11px; color: #999; margin-bottom: 8px; font-weight: 500;">${bagianLabel}</div>` : ''}
+                
                 <div style="display: flex; justify-content: space-between; align-items: start; margin-bottom: 10px;">
                     <div style="flex: 1;">
                         <strong style="font-size: 14px;">${getFieldLabel(fieldName)}</strong>
@@ -173,7 +180,7 @@ function buildFieldsList(siswa, konfirmasi) {
                     </div>
                 </div>
                 
-                ${buildFieldActions(siswa.id, fieldName, fieldStatus)}
+                ${buildFieldActions(siswa.id, fieldName, fieldStatus, isBagianA, isBagianB)}
             </div>
         `;
     }
@@ -183,8 +190,10 @@ function buildFieldsList(siswa, konfirmasi) {
 
 /**
  * Build action buttons for each field
+ * - Bagian A: Setujui, Minta Berkas, Minta Konfirmasi, Minta Edit
+ * - Bagian B: Setujui, Minta Konfirmasi, Minta Edit (TIDAK ada Minta Berkas)
  */
-function buildFieldActions(siswaId, fieldName, fieldStatus) {
+function buildFieldActions(siswaId, fieldName, fieldStatus, isBagianA = false, isBagianB = false) {
     const status = fieldStatus.status;
 
     // Jika sudah approved, tidak perlu tombol
@@ -192,28 +201,49 @@ function buildFieldActions(siswaId, fieldName, fieldStatus) {
         return '<div style="text-align: center; padding: 10px; color: #4caf50; font-weight: 600;">✓ Field ini sudah disetujui</div>';
     }
 
-    return `
-        <div style="display: flex; gap: 10px; margin-top: 10px; flex-wrap: wrap;">
-            <button onclick="konfirmasiField(${siswaId}, '${fieldName}', 'approve')" 
-                    class="btn-small" 
-                    style="background: #4caf50; color: white; flex: 1;">
-                ✓ Setujui
-            </button>
+    let buttons = '';
+    
+    // Tombol 1: Setujui (ada di semua)
+    buttons += `
+        <button onclick="konfirmasiField(${siswaId}, '${fieldName}', 'approve')" 
+                class="btn-small" 
+                style="background: #4caf50; color: white; flex: 1;">
+            ✓ Setujui
+        </button>
+    `;
+    
+    // Tombol 2: Minta Berkas (HANYA untuk Bagian A)
+    if (isBagianA) {
+        buttons += `
             <button onclick="konfirmasiField(${siswaId}, '${fieldName}', 'need_document')" 
                     class="btn-small" 
                     style="background: #ff9800; color: white; flex: 1;">
                 📄 Minta Berkas
             </button>
-            <button onclick="konfirmasiField(${siswaId}, '${fieldName}', 'need_confirmation')" 
-                    class="btn-small" 
-                    style="background: #2196f3; color: white; flex: 1;">
-                💬 Minta Konfirmasi
-            </button>
-            <button onclick="konfirmasiField(${siswaId}, '${fieldName}', 'need_edit')" 
-                    class="btn-small" 
-                    style="background: #9c27b0; color: white; flex: 1;">
-                ✏️ Minta Edit Data
-            </button>
+        `;
+    }
+    
+    // Tombol 3: Minta Konfirmasi (ada di semua)
+    buttons += `
+        <button onclick="konfirmasiField(${siswaId}, '${fieldName}', 'need_confirmation')" 
+                class="btn-small" 
+                style="background: #2196f3; color: white; flex: 1;">
+            💬 Konfirmasi
+        </button>
+    `;
+    
+    // Tombol 4: Minta Edit (ada di semua)
+    buttons += `
+        <button onclick="konfirmasiField(${siswaId}, '${fieldName}', 'need_edit')" 
+                class="btn-small" 
+                style="background: #9c27b0; color: white; flex: 1;">
+            ✏️ Edit
+        </button>
+    `;
+
+    return `
+        <div style="display: flex; gap: 10px; margin-top: 10px; flex-wrap: wrap;">
+            ${buttons}
         </div>
     `;
 }
@@ -221,24 +251,26 @@ function buildFieldActions(siswaId, fieldName, fieldStatus) {
 /**
  * Konfirmasi field action
  */
-async function konfirmasiField(siswaId, fieldName, action) {
+async function konfirmasiField(siswaId, fieldName, action, catatanPrekompilasi = null) {
     // Mapping action ke pesan
     const actionLabels = {
         'approve': 'Setujui field ini',
-        'need_document': 'Minta berkas pendukung',
+        'need_document': fieldName === 'dokumen_ijazah' ? 'Tolak Ijazah - Minta Upload Ulang' : 'Minta berkas pendukung',
         'need_confirmation': 'Minta konfirmasi/penjelasan',
-        'need_edit': 'Minta edit data + berkas'
+        'need_edit': 'Minta edit data'
     };
 
     const actionDescriptions = {
-        'need_document': 'Siswa akan diminta upload berkas pendukung (misal: scan KK, Ijazah).',
+        'need_document': fieldName === 'dokumen_ijazah' 
+            ? 'Upload ulang ijazah karena ada masalah dengan file yang sebelumnya.'
+            : 'Siswa akan diminta upload berkas pendukung (misal: scan KK, Ijazah).',
         'need_confirmation': 'Siswa cukup memberikan penjelasan tanpa perlu upload berkas.',
-        'need_edit': 'Siswa akan diminta edit data dan upload berkas pendukung.'
+        'need_edit': 'Siswa akan diminta edit data.'
     };
 
-    let catatan = null;
+    let catatan = catatanPrekompilasi;
 
-    if (action !== 'approve') {
+    if (!catatan && action !== 'approve') {
         const { value: text } = await Swal.fire({
             title: actionLabels[action],
             html: `
@@ -248,7 +280,7 @@ async function konfirmasiField(siswaId, fieldName, action) {
             `,
             input: 'textarea',
             inputLabel: 'Catatan untuk Siswa',
-            inputPlaceholder: 'Jelaskan dengan detail apa yang perlu dikonfirmasi...',
+            inputPlaceholder: 'Jelaskan dengan detail apa yang perlu dilakukan...',
             inputAttributes: {
                 'aria-label': 'Catatan',
                 'rows': 4
@@ -268,7 +300,7 @@ async function konfirmasiField(siswaId, fieldName, action) {
 
         if (!text) return; // User cancelled
         catatan = text;
-    } else {
+    } else if (!catatan && action === 'approve') {
         // Optional catatan for approve
         const { value: text } = await Swal.fire({
             title: 'Setujui Field',
@@ -447,28 +479,99 @@ async function requestReuploadIjazah(siswaId) {
  */
 function buildAdditionalActions(siswa) {
     const container = document.getElementById('additionalActionsArea');
-    if (!container) return;
+    if (!container) {
+        console.warn('additionalActionsArea container not found!');
+        return;
+    }
+    
+    // Get dokumen ijazah info
+    const dokumenIjazah = siswa.dokumen_ijazah || null;
+    const hasIjazah = dokumenIjazah && dokumenIjazah !== '' && dokumenIjazah !== '-';
+    
+    let ijazahInfoHTML = '';
+    if (hasIjazah) {
+        const ijazahUrl = `../uploads/ijazah/${dokumenIjazah}`;
+        ijazahInfoHTML = `
+            <div style="margin-top: 10px; padding: 10px; background: white; border-radius: 4px;">
+                <div style="display: flex; align-items: center; justify-content: space-between; gap: 10px;">
+                    <div>
+                        <small style="color: #666;">📄 File saat ini:</small>
+                        <div style="font-family: monospace; font-size: 12px; color: #333; margin-top: 3px;">
+                            ${dokumenIjazah}
+                        </div>
+                    </div>
+                    <a href="${ijazahUrl}" target="_blank" 
+                       style="padding: 6px 12px; background: #2196F3; color: white; text-decoration: none; border-radius: 4px; font-size: 12px; white-space: nowrap;">
+                        👁️ Lihat File
+                    </a>
+                </div>
+            </div>
+        `;
+    } else {
+        ijazahInfoHTML = `
+            <div style="margin-top: 10px; padding: 10px; background: #ffebee; border-radius: 4px;">
+                <small style="color: #c62828;">⚠️ Belum ada file ijazah yang diupload</small>
+            </div>
+        `;
+    }
     
     container.innerHTML = `
-        <div style="border-top: 2px solid #eee; padding-top: 20px; margin-top: 20px;">
-            <h4 style="margin: 0 0 15px 0; color: #333;">🔄 Aksi Tambahan</h4>
-            <div style="background: #fff3e0; border-left: 4px solid #ff9800; padding: 15px; border-radius: 4px;">
-                <div style="display: flex; align-items: center; gap: 15px;">
-                    <div style="flex: 1;">
-                        <strong style="color: #e65100;">📸 Upload Ulang Ijazah</strong>
-                        <p style="margin: 5px 0 0 0; color: #666; font-size: 13px;">
-                            Jika foto ijazah blur, terpotong, atau tidak jelas, Anda bisa meminta siswa untuk upload ulang.
-                        </p>
-                    </div>
-                    <button onclick="requestReuploadIjazah(${siswa.id})" 
-                            class="btn-small" 
-                            style="background: #ff5722; color: white; padding: 10px 20px; white-space: nowrap;">
-                        📤 Minta Upload Ulang
-                    </button>
-                </div>
+        <div style="border: 2px solid #ff9800; padding: 20px; border-radius: 8px; background: #fffbf0;">
+            <h3 style="margin: 0 0 15px 0; color: #e65100; display: flex; align-items: center; gap: 10px;">
+                <span style="font-size: 28px;">📸</span>
+                <span>Dokumen Ijazah</span>
+            </h3>
+            
+            ${ijazahInfoHTML}
+            
+            <div style="margin-top: 15px; padding-top: 15px; border-top: 1px solid #ffcc80; display: flex; gap: 10px; flex-wrap: wrap;">
+                <button onclick="approveField(${siswa.id}, 'dokumen_ijazah')" 
+                        class="btn-small" 
+                        style="background: #4caf50; color: white; padding: 12px 24px; border: none; border-radius: 6px; cursor: pointer; font-size: 14px; font-weight: 500; flex: 1; min-width: 150px;">
+                    ✓ Setujui
+                </button>
+                <button onclick="rejectIjazah(${siswa.id})" 
+                        class="btn-small" 
+                        style="background: #f44336; color: white; padding: 12px 24px; border: none; border-radius: 6px; cursor: pointer; font-size: 14px; font-weight: 500; flex: 1; min-width: 150px;">
+                    ❌ Tolak (Minta Upload Ulang)
+                </button>
             </div>
         </div>
     `;
+}
+
+/**
+ * Reject ijazah and ask for re-upload
+ */
+function rejectIjazah(siswaId) {
+    const { value: keterangan } = Swal.fire({
+        title: '❌ Tolak Ijazah - Minta Upload Ulang',
+        html: `
+            <div style="text-align: left; margin-bottom: 15px;">
+                <p style="color: #666; margin-bottom: 10px;">Berikan alasan kenapa ijazah ditolak:</p>
+            </div>
+        `,
+        input: 'textarea',
+        inputPlaceholder: 'Contoh: Foto blur/tidak jelas, dokumen terpotong, format tidak sesuai',
+        inputAttributes: {
+            'aria-label': 'Keterangan alasan tolak',
+            'style': 'min-height: 100px;'
+        },
+        showCancelButton: true,
+        confirmButtonText: '❌ Tolak Ijazah',
+        cancelButtonText: 'Batalkan',
+        confirmButtonColor: '#f44336',
+        inputValidator: (value) => {
+            if (!value || value.length < 10) {
+                return 'Keterangan minimal 10 karakter';
+            }
+        }
+    });
+
+    if (!keterangan) return;
+
+    // Use reject action dengan tipe 'need_document' khusus ijazah
+    konfirmasiField(siswaId, 'dokumen_ijazah', 'need_document', keterangan);
 }
 
 // Helper functions

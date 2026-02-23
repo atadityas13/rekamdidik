@@ -91,7 +91,8 @@ try {
         'nama_kepala_sekolah',      // Wajib
         'nomor_seri_ijazah',        // Wajib
         'tanggal_terbit_ijazah',    // Wajib
-        'dokumen_ijazah'            // Wajib (file)
+        // NOTE: dokumen_ijazah TIDAK dimasukkan ke field review
+        // karena upload ulang ijazah punya section khusus sendiri
     ];
     
     foreach ($fields_dalam_bagian_b as $field) {
@@ -173,8 +174,20 @@ try {
         'siswa' => $siswa,
         'konfirmasi' => $konfirmasi_status,
         'stats' => $stats,
-        'fields_confirmed' => $fields_to_confirm, // Field yang dikonfirmasi
-        'total_fields' => count($fields_to_confirm)
+        'fields_confirmed' => $fields_to_confirm,
+        'total_fields' => count($fields_to_confirm),
+        'bagian_a_fields' => array_values(array_filter($fields_to_confirm, function($f) {
+            // Fields dari Bagian A (history_perbaikan)
+            return in_array($f, ['nik_kk', 'nama_kk', 'tempat_lahir_kk', 'tanggal_lahir_kk', 
+                                'jenis_kelamin_kk', 'nama_ibu_kk', 'nama_ayah_kk',
+                                'nama_ijazah', 'tempat_lahir_ijazah', 'tanggal_lahir_ijazah',
+                                'jenis_kelamin_ijazah', 'nama_ayah_ijazah']);
+        })),
+        'bagian_b_fields' => array_values(array_filter($fields_to_confirm, function($f) {
+            // Fields dari Bagian B (verval_jenjang_sebelumnya)
+            return in_array($f, ['nama_sd', 'tahun_ajaran_kelulusan', 'nip_kepala_sekolah',
+                                'nama_kepala_sekolah', 'nomor_seri_ijazah', 'tanggal_terbit_ijazah']);
+        }))
     ];
 
 } catch (Exception $e) {
