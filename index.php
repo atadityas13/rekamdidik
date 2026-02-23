@@ -772,8 +772,46 @@
                                 </div>
                             </div>
                             
-                            <input type="file" id="dokumen_ijazah" name="dokumen_ijazah" accept=".jpg,.jpeg,.png" required>
-                            ${siswa.verval_data?.dokumen_ijazah ? `<small style="color: #666; margin-top: 5px; display: block;">📎 File saat ini: <a href="/uploads/ijazah/${siswa.verval_data.dokumen_ijazah}" target="_blank" style="color: #667eea; text-decoration: underline;">📥 Download Dokumen</a></small>` : ''}
+                            <!-- Upload Section dengan Tombol Dual Input -->
+                            <div style="background: #f9f9f9; padding: 12px; border-radius: 6px; border: 1px solid #e0e0e0; margin-bottom: 10px;">
+                                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-bottom: 10px;">
+                                    <!-- Tombol 1: Pilih dari Galery -->
+                                    <button type="button" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; border: none; padding: 12px 16px; border-radius: 6px; font-weight: 600; font-size: 13px; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 8px; transition: transform 0.2s;" onclick="document.getElementById('ijazahGalery').click();" onmouseover="this.style.transform='scale(1.02)';" onmouseout="this.style.transform='scale(1)';">
+                                        <span>📁 Pilih dari Galery</span>
+                                    </button>
+                                    
+                                    <!-- Tombol 2: Ambil Foto -->
+                                    <button type="button" style="background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%); color: white; border: none; padding: 12px 16px; border-radius: 6px; font-weight: 600; font-size: 13px; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 8px; transition: transform 0.2s;" onclick="document.getElementById('ijazahCamera').click();" onmouseover="this.style.transform='scale(1.02)';" onmouseout="this.style.transform='scale(1)';">
+                                        <span>📷 Ambil Foto</span>
+                                    </button>
+                                </div>
+                                
+                                <!-- Hidden File Inputs -->
+                                <input type="file" id="ijazahGalery" name="dokumen_ijazah" accept=".jpg,.jpeg,.png" style="display: none;" onchange="handleIjazahChange(this);" required>
+                                <input type="file" id="ijazahCamera" name="dokumen_ijazah" accept="image/*;capture=environment" style="display: none;" onchange="handleIjazahChange(this);" required>
+                                
+                                <!-- Preview & Status -->
+                                <div id="ijazahPreviewContainer" style="display: none; background: white; padding: 10px; border-radius: 6px; border: 2px solid #4caf50; margin-bottom: 10px;">
+                                    <div style="font-size: 12px; color: #666; margin-bottom: 8px;">
+                                        <strong>✓ File Terpilih:</strong> <span id="ijazahFileName">-</span>
+                                    </div>
+                                    <img id="ijazahPreview" src="" alt="Preview" style="max-width: 200px; height: auto; border-radius: 4px; border: 1px solid #ddd; display: block; margin-bottom: 8px;">
+                                    <button type="button" style="background: #f44336; color: white; border: none; padding: 6px 12px; border-radius: 4px; font-size: 12px; cursor: pointer;" onclick="clearIjazahPreview();">✕ Hapus</button>
+                                </div>
+                                
+                                <!-- Bantuan Pengambilan Foto -->
+                                <div style="background: #e3f2fd; padding: 10px; border-radius: 6px; border-left: 4px solid #2196f3; font-size: 11px; color: #1976d2;">
+                                    <strong>💡 Bantuan Pengambilan Foto:</strong>
+                                    <ul style="margin: 5px 0 0 18px; padding: 0; line-height: 1.5;">
+                                        <li>Letakkan ijazah di tempat datar dengan pencahayaan cukup</li>
+                                        <li>Posisikan kamera tegak lurus di atas dokumen</li>
+                                        <li>Sesuaikan agar ijazah memenuhi layar (tidak ada background)</li>
+                                        <li>Pastikan semua teks terlihat jelas sebelum ambil foto</li>
+                                    </ul>
+                                </div>
+                            </div>
+                            
+                            ${siswa.verval_data?.dokumen_ijazah ? `<small style="color: #666; margin-top: 5px; display: block;">📎 File sebelumnya: <a href="/uploads/ijazah/${siswa.verval_data.dokumen_ijazah}" target="_blank" style="color: #667eea; text-decoration: underline;">📥 Lihat</a></small>` : ''}
                         </div>
 
                         <div class="button-group">
