@@ -61,6 +61,11 @@ try {
             $verval_data = $result_verval->fetch_assoc();
             // Merge ke siswa data
             $siswa = array_merge($siswa, $verval_data);
+            // Debug
+            error_log('DEBUG: verval_data merged - dokumen_ijazah = ' . ($verval_data['dokumen_ijazah'] ?? 'NULL'));
+        } else {
+            // Debug
+            error_log('DEBUG: No verval_jenjang_sebelumnya found for siswa_id = ' . $siswa_id);
         }
         $stmt->close();
     }
@@ -169,6 +174,19 @@ try {
 
     $conn->close();
 
+    // Build field source arrays
+    $bagian_a_fields = array_values(array_filter($fields_to_confirm, function($f) {
+        return in_array($f, ['nik_kk', 'nama_kk', 'tempat_lahir_kk', 'tanggal_lahir_kk', 
+                            'jenis_kelamin_kk', 'nama_ibu_kk', 'nama_ayah_kk',
+                            'nama_ijazah', 'tempat_lahir_ijazah', 'tanggal_lahir_ijazah',
+                            'jenis_kelamin_ijazah', 'nama_ayah_ijazah']);
+    }));
+    
+    $bagian_b_fields = array_values(array_filter($fields_to_confirm, function($f) {
+        return in_array($f, ['nama_sd', 'tahun_ajaran_kelulusan', 'nip_kepala_sekolah',
+                            'nama_kepala_sekolah', 'nomor_seri_ijazah', 'tanggal_terbit_ijazah']);
+    }));
+
     $response['success'] = true;
     $response['data'] = [
         'siswa' => $siswa,
@@ -176,19 +194,17 @@ try {
         'stats' => $stats,
         'fields_confirmed' => $fields_to_confirm,
         'total_fields' => count($fields_to_confirm),
-        'bagian_a_fields' => array_values(array_filter($fields_to_confirm, function($f) {
-            // Fields dari Bagian A (history_perbaikan)
-            return in_array($f, ['nik_kk', 'nama_kk', 'tempat_lahir_kk', 'tanggal_lahir_kk', 
-                                'jenis_kelamin_kk', 'nama_ibu_kk', 'nama_ayah_kk',
-                                'nama_ijazah', 'tempat_lahir_ijazah', 'tanggal_lahir_ijazah',
-                                'jenis_kelamin_ijazah', 'nama_ayah_ijazah']);
-        })),
-        'bagian_b_fields' => array_values(array_filter($fields_to_confirm, function($f) {
-            // Fields dari Bagian B (verval_jenjang_sebelumnya)
-            return in_array($f, ['nama_sd', 'tahun_ajaran_kelulusan', 'nip_kepala_sekolah',
-                                'nama_kepala_sekolah', 'nomor_seri_ijazah', 'tanggal_terbit_ijazah']);
-        }))
+        'bagian_a_fields' => $bagian_a_fields,
+        'bagian_b_fields' => $bagian_b_fields,
+        // Debug info
+        '_debug_bagian_a_count' => count($bagian_a_fields),
+        '_debug_bagian_b_count' => count($bagian_b_fields),
+        '_debug_total_fields' => count($fields_to_confirm),
+        '_debug_dokumen_ijazah' => ($siswa['dokumen_ijazah'] ?? 'NULL')
     ];
+    
+    // Debug log
+    error_log('DEBUG: Response siswa.dokumen_ijazah = ' . ($siswa['dokumen_ijazah'] ?? 'NULL'));
 
 } catch (Exception $e) {
     $response['success'] = false;

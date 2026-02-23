@@ -85,6 +85,10 @@ function buildReviewModal(data) {
     const siswa = data.siswa;
     const konfirmasi = data.konfirmasi;
     const stats = data.stats;
+    
+    // Debug: Log siswa data untuk melihat dokumen_ijazah
+    console.log('buildReviewModal - siswa data:', siswa);
+    console.log('buildReviewModal - siswa.dokumen_ijazah:', siswa.dokumen_ijazah);
 
     // Info Siswa
     document.getElementById('reviewSiswaInfo').innerHTML = `
@@ -116,7 +120,10 @@ function buildReviewModal(data) {
     `;
 
     // Fields List
-    buildFieldsList(siswa, konfirmasi, result.data.bagian_a_fields, result.data.bagian_b_fields);
+    console.log('Calling buildFieldsList with:');
+    console.log('  bagian_a_fields:', data.bagian_a_fields);
+    console.log('  bagian_b_fields:', data.bagian_b_fields);
+    buildFieldsList(siswa, konfirmasi, data.bagian_a_fields, data.bagian_b_fields);
 
     // Additional Actions (Upload Ulang Ijazah)
     buildAdditionalActions(siswa);
@@ -131,6 +138,11 @@ function buildReviewModal(data) {
 function buildFieldsList(siswa, konfirmasi, bagianAFields = [], bagianBFields = []) {
     const container = document.getElementById('reviewFieldsList');
     let html = '';
+    
+    // Debug: Log field sources
+    console.log('Bagian A Fields:', bagianAFields);
+    console.log('Bagian B Fields:', bagianBFields);
+    console.log('Fields to Confirm:', Object.keys(konfirmasi));
 
     for (const [fieldName, fieldStatus] of Object.entries(konfirmasi)) {
         const fieldValue = getFieldValue(siswa, fieldName);
@@ -141,6 +153,9 @@ function buildFieldsList(siswa, konfirmasi, bagianAFields = [], bagianBFields = 
         const isBagianA = bagianAFields.includes(fieldName);
         const isBagianB = bagianBFields.includes(fieldName);
         const bagianLabel = isBagianA ? '📋 Bagian A (KK/Ijazah)' : isBagianB ? '🏫 Bagian B (Data SD)' : '';
+        
+        // Debug per field
+        console.log(`Field: ${fieldName} | Bagian A: ${isBagianA} | Bagian B: ${isBagianB} | In A Array: ${bagianAFields.includes(fieldName)} | In B Array: ${bagianBFields.includes(fieldName)}`);
 
         html += `
             <div style="border-bottom: 1px solid #eee; padding: 15px; background: ${getFieldBgColor(fieldStatus.status)};">
@@ -190,8 +205,8 @@ function buildFieldsList(siswa, konfirmasi, bagianAFields = [], bagianBFields = 
 
 /**
  * Build action buttons for each field
- * - Bagian A: Setujui, Minta Berkas, Minta Konfirmasi, Minta Edit
- * - Bagian B: Setujui, Minta Konfirmasi, Minta Edit (TIDAK ada Minta Berkas)
+ * - Bagian A: Setujui, Minta Berkas, Minta Konfirmasi, Minta Edit (4 tombol)
+ * - Bagian B: Setujui, Minta Konfirmasi, Minta Edit (3 tombol - TIDAK ada Minta Berkas)
  */
 function buildFieldActions(siswaId, fieldName, fieldStatus, isBagianA = false, isBagianB = false) {
     const status = fieldStatus.status;
@@ -201,49 +216,51 @@ function buildFieldActions(siswaId, fieldName, fieldStatus, isBagianA = false, i
         return '<div style="text-align: center; padding: 10px; color: #4caf50; font-weight: 600;">✓ Field ini sudah disetujui</div>';
     }
 
-    let buttons = '';
+    const buttons = [];
     
-    // Tombol 1: Setujui (ada di semua)
-    buttons += `
+    // Tombol 1: Setujui (ada di SEMUA field - Bagian A, B, dan Ijazah)
+    buttons.push(`
         <button onclick="konfirmasiField(${siswaId}, '${fieldName}', 'approve')" 
                 class="btn-small" 
-                style="background: #4caf50; color: white; flex: 1;">
+                style="background: #4caf50; color: white; padding: 8px 12px; border: none; border-radius: 4px; cursor: pointer; font-size: 12px; font-weight: 500; min-width: 100px;">
             ✓ Setujui
         </button>
-    `;
+    `);
     
-    // Tombol 2: Minta Berkas (HANYA untuk Bagian A)
-    if (isBagianA) {
-        buttons += `
+    // Tombol 2: Minta Berkas (HANYA untuk Bagian A - JANGAN untuk Bagian B)
+    if (isBagianA && !isBagianB) {
+        buttons.push(`
             <button onclick="konfirmasiField(${siswaId}, '${fieldName}', 'need_document')" 
                     class="btn-small" 
-                    style="background: #ff9800; color: white; flex: 1;">
-                📄 Minta Berkas
+                    style="background: #ff9800; color: white; padding: 8px 12px; border: none; border-radius: 4px; cursor: pointer; font-size: 12px; font-weight: 500; min-width: 100px;">
+                📄 Berkas
             </button>
-        `;
+        `);
     }
     
-    // Tombol 3: Minta Konfirmasi (ada di semua)
-    buttons += `
+    // Tombol 3: Minta Konfirmasi (ada di SEMUA - Bagian A dan B)
+    buttons.push(`
         <button onclick="konfirmasiField(${siswaId}, '${fieldName}', 'need_confirmation')" 
                 class="btn-small" 
-                style="background: #2196f3; color: white; flex: 1;">
+                style="background: #2196f3; color: white; padding: 8px 12px; border: none; border-radius: 4px; cursor: pointer; font-size: 12px; font-weight: 500; min-width: 100px;">
             💬 Konfirmasi
         </button>
-    `;
+    `);
     
-    // Tombol 4: Minta Edit (ada di semua)
-    buttons += `
+    // Tombol 4: Minta Edit (ada di SEMUA - Bagian A dan B)
+    buttons.push(`
         <button onclick="konfirmasiField(${siswaId}, '${fieldName}', 'need_edit')" 
                 class="btn-small" 
-                style="background: #9c27b0; color: white; flex: 1;">
+                style="background: #9c27b0; color: white; padding: 8px 12px; border: none; border-radius: 4px; cursor: pointer; font-size: 12px; font-weight: 500; min-width: 100px;">
             ✏️ Edit
         </button>
-    `;
+    `);
+    
+    console.log(`buildFieldActions - ${fieldName} (A:${isBagianA}, B:${isBagianB}) - ${buttons.length} tombol`);
 
     return `
-        <div style="display: flex; gap: 10px; margin-top: 10px; flex-wrap: wrap;">
-            ${buttons}
+        <div style="display: flex; gap: 8px; margin-top: 10px; flex-wrap: wrap; align-items: center;">
+            ${buttons.join('')}
         </div>
     `;
 }
@@ -478,15 +495,45 @@ async function requestReuploadIjazah(siswaId) {
  * Build additional actions area (Upload Ulang Ijazah)
  */
 function buildAdditionalActions(siswa) {
-    const container = document.getElementById('additionalActionsArea');
+    let container = document.getElementById('additionalActionsArea');
+    
+    // Fallback: jika container tidak ada, coba temukan di modal
     if (!container) {
-        console.warn('additionalActionsArea container not found!');
+        console.warn('additionalActionsArea container not found! Trying to find parent modal...');
+        const modal = document.getElementById('reviewVervalModal');
+        if (modal) {
+            // Cek apakah sudah ada, kalau belum buat baru
+            const existing = modal.querySelector('[id="additionalActionsArea"]');
+            if (!existing) {
+                const newContainer = document.createElement('div');
+                newContainer.id = 'additionalActionsArea';
+                newContainer.style.marginTop = '20px';
+                // Insert sebelum finalActionArea
+                const finalArea = modal.querySelector('[id="finalActionArea"]');
+                if (finalArea) {
+                    finalArea.parentNode.insertBefore(newContainer, finalArea);
+                } else {
+                    modal.querySelector('.modal-content').appendChild(newContainer);
+                }
+                container = newContainer;
+            } else {
+                container = existing;
+            }
+        }
+    }
+    
+    if (!container) {
+        console.error('Could not find or create additionalActionsArea container!');
         return;
     }
     
     // Get dokumen ijazah info
     const dokumenIjazah = siswa.dokumen_ijazah || null;
     const hasIjazah = dokumenIjazah && dokumenIjazah !== '' && dokumenIjazah !== '-';
+    
+    // Debug
+    console.log('buildAdditionalActions - dokumenIjazah:', dokumenIjazah);
+    console.log('buildAdditionalActions - hasIjazah:', hasIjazah);
     
     let ijazahInfoHTML = '';
     if (hasIjazah) {
@@ -515,7 +562,8 @@ function buildAdditionalActions(siswa) {
         `;
     }
     
-    container.innerHTML = `
+    // Build complete HTML
+    const html = `
         <div style="border: 2px solid #ff9800; padding: 20px; border-radius: 8px; background: #fffbf0;">
             <h3 style="margin: 0 0 15px 0; color: #e65100; display: flex; align-items: center; gap: 10px;">
                 <span style="font-size: 28px;">📸</span>
@@ -525,7 +573,7 @@ function buildAdditionalActions(siswa) {
             ${ijazahInfoHTML}
             
             <div style="margin-top: 15px; padding-top: 15px; border-top: 1px solid #ffcc80; display: flex; gap: 10px; flex-wrap: wrap;">
-                <button onclick="approveField(${siswa.id}, 'dokumen_ijazah')" 
+                <button onclick="konfirmasiField(${siswa.id}, 'dokumen_ijazah', 'approve')" 
                         class="btn-small" 
                         style="background: #4caf50; color: white; padding: 12px 24px; border: none; border-radius: 6px; cursor: pointer; font-size: 14px; font-weight: 500; flex: 1; min-width: 150px;">
                     ✓ Setujui
@@ -538,13 +586,16 @@ function buildAdditionalActions(siswa) {
             </div>
         </div>
     `;
+    
+    container.innerHTML = html;
+    console.log('buildAdditionalActions - section rendered successfully');
 }
 
 /**
  * Reject ijazah and ask for re-upload
  */
-function rejectIjazah(siswaId) {
-    const { value: keterangan } = Swal.fire({
+async function rejectIjazah(siswaId) {
+    const { value: keterangan } = await Swal.fire({
         title: '❌ Tolak Ijazah - Minta Upload Ulang',
         html: `
             <div style="text-align: left; margin-bottom: 15px;">
