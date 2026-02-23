@@ -1,0 +1,173 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Form Input Data Siswa - Admin</title>
+    <link rel="stylesheet" href="assets/css/style.css">
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>📝 Input Data Siswa Baru</h1>
+            <p>Tambah data siswa ke sistem verval</p>
+        </header>
+
+        <div class="card">
+            <div style="margin-bottom: 20px;">
+                <a href="admin/index.php" class="button button-secondary">← Kembali ke Admin</a>
+            </div>
+
+            <div id="alertContainer"></div>
+
+            <form id="inputForm">
+                <div class="data-section">
+                    <h3>📋 Data Siswa Utama</h3>
+                    
+                    <div class="data-row">
+                        <div class="form-group">
+                            <label for="nisn">NISN (10 digit) *</label>
+                            <input type="text" id="nisn" name="nisn" placeholder="0123456789" maxlength="10" required>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="verval_status">Status Verval *</label>
+                            <select id="verval_status" name="verval_status" required>
+                                <option value="belum">Belum Verval</option>
+                                <option value="sudah">Sudah Verval</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="data-section">
+                    <h3>📋 Data dari Kartu Keluarga (KK)</h3>
+                    
+                    <div class="data-row">
+                        <div class="form-group">
+                            <label for="nik_kk">NIK (KK)</label>
+                            <input type="text" id="nik_kk" name="nik_kk" placeholder="16 digit">
+                        </div>
+
+                        <div class="form-group">
+                            <label for="nama_kk">Nama (KK) *</label>
+                            <input type="text" id="nama_kk" name="nama_kk" required>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="tempat_lahir_kk">Tempat Lahir (KK) *</label>
+                            <input type="text" id="tempat_lahir_kk" name="tempat_lahir_kk" required>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="tanggal_lahir_kk">Tanggal Lahir (KK) *</label>
+                            <input type="date" id="tanggal_lahir_kk" name="tanggal_lahir_kk" required>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="jenis_kelamin_kk">Jenis Kelamin (KK) *</label>
+                            <select id="jenis_kelamin_kk" name="jenis_kelamin_kk" required>
+                                <option value="">-- Pilih --</option>
+                                <option value="L">Laki-laki</option>
+                                <option value="P">Perempuan</option>
+                            </select>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="nama_ibu_kk">Nama Ibu Kandung (KK) *</label>
+                            <input type="text" id="nama_ibu_kk" name="nama_ibu_kk" required>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="nama_ayah_kk">Nama Ayah Kandung (KK) *</label>
+                            <input type="text" id="nama_ayah_kk" name="nama_ayah_kk" required>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="data-section">
+                    <h3>📋 Data dari Ijazah</h3>
+                    
+                    <div class="data-row">
+                        <div class="form-group">
+                            <label for="nama_ijazah">Nama (Ijazah)</label>
+                            <input type="text" id="nama_ijazah" name="nama_ijazah">
+                        </div>
+
+                        <div class="form-group">
+                            <label for="tempat_lahir_ijazah">Tempat Lahir (Ijazah)</label>
+                            <input type="text" id="tempat_lahir_ijazah" name="tempat_lahir_ijazah">
+                        </div>
+
+                        <div class="form-group">
+                            <label for="tanggal_lahir_ijazah">Tanggal Lahir (Ijazah)</label>
+                            <input type="date" id="tanggal_lahir_ijazah" name="tanggal_lahir_ijazah">
+                        </div>
+
+                        <div class="form-group">
+                            <label for="jenis_kelamin_ijazah">Jenis Kelamin (Ijazah)</label>
+                            <select id="jenis_kelamin_ijazah" name="jenis_kelamin_ijazah">
+                                <option value="">-- Pilih --</option>
+                                <option value="L">Laki-laki</option>
+                                <option value="P">Perempuan</option>
+                            </select>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="nama_ayah_ijazah">Nama Ayah Kandung (Ijazah)</label>
+                            <input type="text" id="nama_ayah_ijazah" name="nama_ayah_ijazah">
+                        </div>
+                    </div>
+                </div>
+
+                <div class="button-group">
+                    <button type="submit" class="button button-success">💾 Simpan Data Siswa</button>
+                    <button type="reset" class="button button-secondary">↺ Reset Form</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <script src="assets/js/utils.js"></script>
+    <script>
+        document.getElementById('inputForm').addEventListener('submit', async function(e) {
+            e.preventDefault();
+
+            const formData = new FormData(this);
+            const data = Object.fromEntries(formData);
+
+            // Validasi NISN
+            if (!/^\d{10}$/.test(data.nisn)) {
+                showAlert('NISN harus 10 digit angka', 'error');
+                return;
+            }
+
+            try {
+                const response = await fetch('api/insert-siswa.php', {
+                    method: 'POST',
+                    body: JSON.stringify(data),
+                    headers: {
+                        'Content-Type': 'application/json'
+                    }
+                });
+
+                const result = await response.json();
+
+                if (result.success) {
+                    showAlert('Data siswa berhasil disimpan', 'success');
+                    document.getElementById('inputForm').reset();
+                    
+                    // Redirect after 2 seconds
+                    setTimeout(() => {
+                        window.location.href = 'admin/index.php';
+                    }, 2000);
+                } else {
+                    showAlert(result.message, 'error');
+                }
+            } catch (error) {
+                showAlert('Terjadi kesalahan: ' + error.message, 'error');
+            }
+        });
+    </script>
+</body>
+</html>
