@@ -12,6 +12,11 @@
  * 6. Update status verval ke 'sudah'
  */
 
+// Enable error logging
+ini_set('display_errors', '1');
+ini_set('display_startup_errors', '1');
+error_reporting(E_ALL);
+
 header('Content-Type: application/json');
 header('Access-Control-Allow-Origin: *');
 header('Access-Control-Allow-Methods: POST');
@@ -32,8 +37,19 @@ try {
         throw new Exception('ID Siswa tidak valid');
     }
 
-    $db = new Database();
-    $conn = $db->connect();
+    // Initialize database connection
+    try {
+        $db = new Database();
+        $conn = $db->connect();
+    } catch (Exception $e) {
+        throw new Exception('Database connection failed: ' . $e->getMessage());
+    }
+    
+    // Check if connection is valid
+    if (!$conn) {
+        throw new Exception('Failed to create database connection');
+    }
+    
     $conn->begin_transaction();
 
     try {
@@ -62,7 +78,7 @@ try {
         foreach ($editable_fields as $field) {
             if (isset($_POST[$field])) {
                 $new_value = trim($_POST[$field]);
-                $old_value = $siswa_old[$field] ?? null;
+                $old_value = isset($siswa_old[$field]) ? $siswa_old[$field] : '';
                 
                 // Jika ada perubahan, catat ke history
                 if ($new_value !== $old_value && !empty($new_value)) {
@@ -71,9 +87,8 @@ try {
                         'old' => $old_value,
                         'new' => $new_value
                     ];
+                    $updates[$field] = $new_value;
                 }
-                
-                $updates[$field] = $new_value;
             }
         }
 
@@ -281,9 +296,21 @@ try {
     }
 
 } catch (Exception $e) {
+    if (isset($conn)) {
+        try {
+            $conn->rollback();
+        } catch (Exception $rb_error) {
+            // Rollback failed, but still catch original error
+        }
+    }
     $response['success'] = false;
     $response['message'] = 'Error: ' . $e->getMessage();
+    $response['errors'][] = $e->getMessage();
 }
 
+// Ensure JSON output
+if (!headers_sent()) {
+    header('Content-Type: application/json');
+}
 echo json_encode($response);
 ?>

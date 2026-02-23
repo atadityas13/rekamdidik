@@ -637,16 +637,37 @@
                 // Ensure all checkboxes have name attribute before collecting FormData
                 ensureCheckboxNames();
 
+                // IMPORTANT: Disabled fields don't get included in FormData
+                // First, log how many fields are disabled
+                const allInputs = this.querySelectorAll('input[type="text"], input[type="date"], select');
+                const disabledCount = Array.from(allInputs).filter(i => i.disabled).length;
+                console.log(`🔒 Total inputs: ${allInputs.length}, Disabled: ${disabledCount}`);
+
+                // Temporarily enable all fields to collect their values
+                allInputs.forEach(input => {
+                    input.disabled = false;
+                });
+
                 const formData = new FormData(this);
                 
-                // Debug: Log all form data being sent
+                // Debug: Log all form data being sent with detailed breakdown
                 console.log('📤 Form Data Submitted:');
+                const formEntries = {};
                 for (let [key, value] of formData.entries()) {
                     if (key === 'dokumen_ijazah') {
                         console.log(`  ${key}: [File: ${value.name}]`);
+                        formEntries[key] = `[File: ${value.name}]`;
                     } else {
                         console.log(`  ${key}: ${value}`);
+                        formEntries[key] = value;
                     }
+                }
+                
+                // Check for required Bagian A fields
+                const requiredBagianA = ['nik_kk', 'nama_kk', 'nama_ijazah', 'tempat_lahir_kk', 'tempat_lahir_ijazah'];
+                const missingBagianA = requiredBagianA.filter(f => !formEntries[f]);
+                if (missingBagianA.length > 0) {
+                    console.warn('⚠️  Missing Bagian A fields:', missingBagianA);
                 }
                 
                 try {
