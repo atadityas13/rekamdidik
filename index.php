@@ -728,7 +728,7 @@
                                 <div style="background: white; padding: 8px; border-radius: 4px; border: 2px solid #f44336;">
                                     <div style="color: #f44336; font-weight: 600; font-size: 11px; margin-bottom: 6px;">✗ JANGAN - Kondisi Ditolak</div>
                                     
-                                    <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 6px; margin-bottom: 6px;">
+                                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 6px; margin-bottom: 6px;">
                                         <!-- Buram -->
                                         <div>
                                             <small style="color: #d32f2f; font-weight: 600; font-size: 9px; display: block; margin-bottom: 3px;">Buram</small>
@@ -738,11 +738,6 @@
                                         <div>
                                             <small style="color: #d32f2f; font-weight: 600; font-size: 9px; display: block; margin-bottom: 3px;">Gelap</small>
                                             <img src="/assets/images/contohijazah.jpg" alt="Gelap" style="width: 100%; height: auto; border-radius: 3px; border: 1px solid #ddd; filter: brightness(0.4);">
-                                        </div>
-                                        <!-- Miring -->
-                                        <div>
-                                            <small style="color: #d32f2f; font-weight: 600; font-size: 9px; display: block; margin-bottom: 3px;">Miring</small>
-                                            <img src="/assets/images/contohijazah.jpg" alt="Miring" style="width: 100%; height: auto; border-radius: 3px; border: 1px solid #ddd; transform: rotate(-15deg);">
                                         </div>
                                     </div>
                                     
@@ -758,14 +753,26 @@
                                         <div>
                                             <small style="color: #d32f2f; font-weight: 600; font-size: 9px; display: block; margin-bottom: 3px;">Terlalu Dekat</small>
                                             <div style="width: 100%; height: 140px; border-radius: 3px; border: 1px solid #ddd; overflow: hidden;">
-                                                <img src="/assets/images/contohijazah.jpg" alt="Dekat" style="width: 130%; height: 130%; object-fit: cover; object-position: center;">
+                                                <img src="/assets/images/contohijazah.jpg" alt="Dekat" style="width: 200%; height: 200%; object-fit: cover; object-position: 30% 20%;">
                                             </div>
                                         </div>
+                                        <!-- Miring -->
+                                        <div>
+                                            <small style="color: #d32f2f; font-weight: 600; font-size: 9px; display: block; margin-bottom: 3px;">Miring</small>
+                                            <div style="width: 100%; height: 140px; border-radius: 3px; border: 1px solid #ddd; overflow: hidden; display: flex; align-items: center; justify-content: center; background: #f0f0f0;">
+                                                <img src="/assets/images/contohijazah.jpg" alt="Miring" style="width: 90%; height: auto; border-radius: 2px; transform: rotate(-15deg);">
+                                            </div>
+                                        </div>
+                                    </div>
+                                    
+                                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 6px; margin-top: 6px;">
                                         <!-- B&W -->
                                         <div>
                                             <small style="color: #d32f2f; font-weight: 600; font-size: 9px; display: block; margin-bottom: 3px;">B&W / Buruk</small>
                                             <img src="/assets/images/contohijazah.jpg" alt="BW" style="width: 100%; height: auto; border-radius: 3px; border: 1px solid #ddd; filter: grayscale(100%) contrast(1.5);">
                                         </div>
+                                        <!-- Placeholder untuk keseimbangan -->
+                                        <div></div>
                                     </div>
                                 </div>
                             </div>
