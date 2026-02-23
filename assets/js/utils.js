@@ -131,10 +131,71 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     });
 
-    // Close button functionality
+// Close button functionality
     document.querySelectorAll('.close-modal').forEach(btn => {
         btn.addEventListener('click', function() {
             this.closest('.modal').classList.remove('active');
         });
     });
 });
+
+/**
+ * Copy to Clipboard Function
+ */
+async function copyToClipboard(text, button) {
+    try {
+        // Check if the text is valid
+        if (!text || text === '-' || text === '') {
+            showAlert('Tidak ada data untuk disalin', 'warning');
+            return;
+        }
+
+        // Use modern clipboard API
+        await navigator.clipboard.writeText(text);
+
+        // Visual feedback
+        if (button) {
+            const originalText = button.innerHTML;
+            button.classList.add('copied');
+            button.innerHTML = '✓';
+
+            setTimeout(() => {
+                button.classList.remove('copied');
+                button.innerHTML = originalText;
+            }, 1500);
+        }
+
+        showAlert('Data berhasil disalin!', 'success');
+    } catch (err) {
+        console.error('Failed to copy:', err);
+        // Fallback for older browsers
+        try {
+            const textArea = document.createElement('textarea');
+            textArea.value = text;
+            textArea.style.position = 'fixed';
+            textArea.style.left = '-999999px';
+            textArea.style.top = '-999999px';
+            document.body.appendChild(textArea);
+            textArea.focus();
+            textArea.select();
+            document.execCommand('copy');
+            document.body.removeChild(textArea);
+
+            // Visual feedback
+            if (button) {
+                const originalText = button.innerHTML;
+                button.classList.add('copied');
+                button.innerHTML = '✓';
+
+                setTimeout(() => {
+                    button.classList.remove('copied');
+                    button.innerHTML = originalText;
+                }, 1500);
+            }
+
+            showAlert('Data berhasil disalin!', 'success');
+        } catch (fallbackErr) {
+            showAlert('Gagal menyalin data', 'error');
+        }
+    }
+}

@@ -659,3 +659,51 @@ table tbody tr:hover {
         grid-template-columns: 1fr;
     }
 }
+
+/* Copy Button Styles */
+.copy-btn {
+    background: none;
+    border: none;
+    cursor: pointer;
+    padding: 4px 8px;
+    border-radius: 4px;
+    color: #667eea;
+    font-size: 14px;
+    transition: all 0.2s;
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    margin-left: 8px;
+}
+
+.copy-btn:hover {
+    background: #667eea;
+    color: white;
+}
+
+.copy-btn.copied {
+    background: #4caf50;
+    color: white;
+}
+
+.copy-btn:disabled {
+    color: #ccc;
+    cursor: not-allowed;
+}
+
+.copy-btn:disabled:hover {
+    background: none;
+    color: #ccc;
+}
+
+/* Data field with copy button */
+.data-field-value {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.data-field-value p {
+    flex: 1;
+    margin: 0;
+}

@@ -891,32 +891,50 @@ if (!isset($_SESSION['logged_in']) || $_SESSION['logged_in'] !== true) {
 
             if (siswa.verval_data) {
                 html += `
-                    <div class="data-section">
+<div class="data-section">
                         <h4 style="color: #667eea; margin-bottom: 15px;">🏫 Data Verval Jenjang Sebelumnya</h4>
                         <div class="data-row">
                             <div class="data-field">
                                 <label>Nama Sekolah Dasar (SD)</label>
-                                <p>${siswa.verval_data.nama_sd || '-'}</p>
+                                <div class="data-field-value">
+                                    <p>${siswa.verval_data.nama_sd || '-'}</p>
+                                    <button class="copy-btn" onclick="copyToClipboard('${siswa.verval_data.nama_sd || ''}', this)" title="Salin">📋</button>
+                                </div>
                             </div>
                             <div class="data-field">
                                 <label>Tahun Ajaran Kelulusan</label>
-                                <p>${siswa.verval_data.tahun_ajaran_kelulusan || '-'}</p>
+                                <div class="data-field-value">
+                                    <p>${siswa.verval_data.tahun_ajaran_kelulusan || '-'}</p>
+                                    <button class="copy-btn" onclick="copyToClipboard('${siswa.verval_data.tahun_ajaran_kelulusan || ''}', this)" title="Salin">📋</button>
+                                </div>
                             </div>
                             <div class="data-field">
                                 <label>NIP Kepala Sekolah pada Ijazah</label>
-                                <p>${siswa.verval_data.nip_kepala_sekolah || '-'}</p>
+                                <div class="data-field-value">
+                                    <p>${siswa.verval_data.nip_kepala_sekolah || '-'}</p>
+                                    <button class="copy-btn" onclick="copyToClipboard('${siswa.verval_data.nip_kepala_sekolah || ''}', this)" title="Salin">📋</button>
+                                </div>
                             </div>
                             <div class="data-field">
                                 <label>Nama Kepala Sekolah pada Ijazah</label>
-                                <p>${siswa.verval_data.nama_kepala_sekolah || '-'}</p>
+                                <div class="data-field-value">
+                                    <p>${siswa.verval_data.nama_kepala_sekolah || '-'}</p>
+                                    <button class="copy-btn" onclick="copyToClipboard('${siswa.verval_data.nama_kepala_sekolah || ''}', this)" title="Salin">📋</button>
+                                </div>
                             </div>
                             <div class="data-field">
                                 <label>Nomor Seri Ijazah</label>
-                                <p>${siswa.verval_data.nomor_seri_ijazah || '-'}</p>
+                                <div class="data-field-value">
+                                    <p>${siswa.verval_data.nomor_seri_ijazah || '-'}</p>
+                                    <button class="copy-btn" onclick="copyToClipboard('${siswa.verval_data.nomor_seri_ijazah || ''}', this)" title="Salin">📋</button>
+                                </div>
                             </div>
                             <div class="data-field">
                                 <label>Tanggal Terbit Ijazah</label>
-                                <p>${formatDate(siswa.verval_data.tanggal_terbit_ijazah) || '-'}</p>
+                                <div class="data-field-value">
+                                    <p>${formatDate(siswa.verval_data.tanggal_terbit_ijazah) || '-'}</p>
+                                    <button class="copy-btn" onclick="copyToClipboard('${formatDate(siswa.verval_data.tanggal_terbit_ijazah) || ''}', this)" title="Salin">📋</button>
+                                </div>
                             </div>
                             <div class="data-field">
                                 <label>Dokumen Ijazah</label>
