@@ -62,9 +62,9 @@ if (!isset($_SESSION['logged_in']) || $_SESSION['logged_in'] !== true) {
             <div class="admin-header">
                 <h2 style="color: #333;">Daftar Data Siswa</h2>
                 <div class="header-right">
-                    <div class="user-info">
+                    <button id="btnChangePassword" class="user-info" style="border: none; background: none; cursor: pointer; padding: 0;">
                         👤 <strong><?php echo htmlspecialchars($_SESSION['admin_nama'] ?? $_SESSION['admin_username']); ?></strong>
-                    </div>
+                    </button>
                     <a href="../index.php" class="button button-secondary" style="font-size: 13px; padding: 8px 15px;">← Verval</a>
                     <button id="btnLogout" class="button" style="font-size: 13px; padding: 8px 15px; background: #d32f2f; color: white; border: none; border-radius: 4px; cursor: pointer;">Logout</button>
                 </div>
@@ -165,6 +165,40 @@ if (!isset($_SESSION['logged_in']) || $_SESSION['logged_in'] !== true) {
         </div>
     </div>
 
+    <!-- Modal Change Password -->
+    <div id="changePasswordModal" class="modal">
+        <div class="modal-content" style="max-width: 500px;">
+            <div class="modal-header">
+                <h2>🔐 Ubah Username & Password</h2>
+                <button class="close-modal">&times;</button>
+            </div>
+            <form id="changePasswordForm" style="padding: 0 20px;">
+                <div class="form-group">
+                    <label>Username Baru</label>
+                    <input type="text" id="newUsername" placeholder="Masukkan username baru" required>
+                </div>
+                <div class="form-group">
+                    <label>Password Saat Ini</label>
+                    <input type="password" id="currentPassword" placeholder="Masukkan password saat ini" required>
+                </div>
+                <div class="form-group">
+                    <label>Password Baru</label>
+                    <input type="password" id="newPassword" placeholder="Biarkan kosong jika tidak ingin ubah">
+                </div>
+                <div class="form-group">
+                    <label>Konfirmasi Password Baru</label>
+                    <input type="password" id="confirmPassword" placeholder="Konfirmasi password baru">
+                    <small style="color: #666; display: block; margin-top: 5px;">Password harus minimal 6 karakter</small>
+                </div>
+                <div id="changePassResult" style="margin: 15px 0;"></div>
+                <div style="display: flex; gap: 10px; justify-content: flex-end;">
+                    <button type="button" class="button button-secondary close-modal">Batal</button>
+                    <button type="submit" class="button button-success">Simpan Perubahan</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
     <script src="../assets/js/utils.js"></script>
     <script>
         let currentPage = 1;
@@ -194,13 +228,86 @@ if (!isset($_SESSION['logged_in']) || $_SESSION['logged_in'] !== true) {
             });
         });
 
+        // Change password handler
+        document.getElementById('btnChangePassword').addEventListener('click', function() {
+            openModal('changePasswordModal');
+        });
+
+        document.getElementById('changePasswordForm').addEventListener('submit', async function(e) {
+            e.preventDefault();
+
+            const newUsername = document.getElementById('newUsername').value.trim();
+            const currentPassword = document.getElementById('currentPassword').value;
+            const newPassword = document.getElementById('newPassword').value;
+            const confirmPassword = document.getElementById('confirmPassword').value;
+            const resultBox = document.getElementById('changePassResult');
+
+            resultBox.innerHTML = '';
+
+            // Validasi
+            if (!newUsername) {
+                resultBox.innerHTML = '<div class="alert alert-error">Username tidak boleh kosong</div>';
+                return;
+            }
+
+            if (!currentPassword) {
+                resultBox.innerHTML = '<div class="alert alert-error">Password saat ini harus diisi</div>';
+                return;
+            }
+
+            // Jika ada password baru, harus dikonfirmasi
+            if (newPassword) {
+                if (newPassword.length < 6) {
+                    resultBox.innerHTML = '<div class="alert alert-error">Password baru minimal 6 karakter</div>';
+                    return;
+                }
+
+                if (newPassword !== confirmPassword) {
+                    resultBox.innerHTML = '<div class="alert alert-error">Konfirmasi password tidak cocok</div>';
+                    return;
+                }
+            }
+
+            try {
+                const response = await fetch('../api/admin/change-password.php', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        new_username: newUsername,
+                        current_password: currentPassword,
+                        new_password: newPassword || null
+                    })
+                });
+
+                const result = await response.json();
+
+                if (result.success) {
+                    showAlert('Perubahan berhasil disimpan. Silakan login kembali.', 'success');
+                    setTimeout(() => {
+                        closeModal('changePasswordModal');
+                        window.location.href = '../auth/login.php';
+                    }, 1500);
+                } else {
+                    resultBox.innerHTML = `<div class="alert alert-error">${result.message}</div>`;
+                }
+            } catch (error) {
+                resultBox.innerHTML = `<div class="alert alert-error">Terjadi kesalahan: ${error.message}</div>`;
+            }
+        });
+
         // Modal controls
         function openModal(modalId) {
-            document.getElementById(modalId).style.display = 'block';
+            const modal = document.getElementById(modalId);
+            modal.style.display = 'flex';
+            modal.classList.add('active');
         }
 
         function closeModal(modalId) {
-            document.getElementById(modalId).style.display = 'none';
+            const modal = document.getElementById(modalId);
+            modal.style.display = 'none';
+            modal.classList.remove('active');
         }
 
         document.querySelectorAll('.close-modal').forEach(btn => {
@@ -355,6 +462,10 @@ if (!isset($_SESSION['logged_in']) || $_SESSION['logged_in'] !== true) {
                                 ? `<a href="../uploads/ijazah/${siswa.dokumen_ijazah}" target="_blank" style="color: #667eea; margin-right: 10px;">👁 Lihat</a><a href="../uploads/ijazah/${siswa.dokumen_ijazah}" download style="color: #667eea;">⬇️ Download</a>`
                                 : '<span style="color: #999;">-</span>';
 
+                            const batalkanBtn = siswa.verval_status === 'sudah' 
+                                ? `<button class="btn-small btn-danger" onclick="cancelVerval(${siswa.id})" style="font-size: 11px; padding: 5px 8px; background: #d32f2f; color: white;">✕ Batalkan</button>`
+                                : '';
+
                             html += `
                                 <tr>
                                     <td>${no}</td>
@@ -366,11 +477,12 @@ if (!isset($_SESSION['logged_in']) || $_SESSION['logged_in'] !== true) {
                                     <td>
                                         <div class="table-actions" style="display: flex; gap: 5px; flex-wrap: wrap;">
                                             <button class="btn-small btn-view" onclick="viewDetail(${siswa.id})" style="font-size: 11px; padding: 5px 8px;">👁 Lihat Data</button>
-                                            <button class="btn-small btn-danger" onclick="cancelVerval(${siswa.id})" style="font-size: 11px; padding: 5px 8px; background: #d32f2f; color: white;">✕ Batalkan</button>
+                                            ${batalkanBtn}
                                         </div>
                                     </td>
                                 </tr>
                             `;
+
                         });
 
                         tableBody.innerHTML = html;
