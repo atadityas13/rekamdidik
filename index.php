@@ -218,57 +218,10 @@
         });
 
         // Helper functions - Global untuk digunakan di berbagai tempat
-function formatDate(date) {
+        function formatDate(date) {
             if (!date) return '-';
             const d = new Date(date);
             return d.toLocaleDateString('id-ID', { day: '2-digit', month: 'long', year: 'numeric' });
-        }
-
-        // ========================================
-        // IJAZAH UPLOAD HANDLERS
-        // ========================================
-        function handleIjazahChange(input) {
-            if (input.files && input.files[0]) {
-                const file = input.files[0];
-                
-                // Validasi ukuran file (1MB = 1024 * 1024 bytes)
-                const maxSize = 1 * 1024 * 1024;
-                if (file.size > maxSize) {
-                    const sizeMB = (file.size / (1024 * 1024)).toFixed(2);
-                    showAlert('Ukuran file terlalu besar (' + sizeMB + 'MB). Maksimal 1MB', 'error');
-                    input.value = ''; // Reset input
-                    return;
-                }
-                
-                // Validasi tipe file
-                const allowedTypes = ['image/jpeg', 'image/jpg', 'image/png'];
-                if (!allowedTypes.includes(file.type)) {
-                    showAlert('Format file tidak valid. Gunakan JPG atau PNG', 'error');
-                    input.value = ''; // Reset input
-                    return;
-                }
-                
-                // Tampilkan preview
-                const reader = new FileReader();
-                reader.onload = function(e) {
-                    document.getElementById('ijazahPreview').src = e.target.result;
-                    document.getElementById('ijazahFileName').textContent = file.name;
-                    document.getElementById('ijazahPreviewContainer').style.display = 'block';
-                };
-                reader.readAsDataURL(file);
-            }
-        }
-
-        function clearIjazahPreview() {
-            // Reset file inputs
-            document.getElementById('ijazahGalery').value = '';
-            document.getElementById('ijazahCamera').value = '';
-            document.getElementById('dokumen_ijazah').value = '';
-            
-            // Hide preview
-            document.getElementById('ijazahPreviewContainer').style.display = 'none';
-            document.getElementById('ijazahPreview').src = '';
-            document.getElementById('ijazahFileName').textContent = '-';
         }
 
         function formatTime(datetime) {
@@ -818,8 +771,9 @@ function formatDate(date) {
                                     </div>
                                 </div>
                             </div>
-                         <input type="file" id="dokumen_ijazah" name="dokumen_ijazah" accept=".jpg,.jpeg,.png" required>
-                            ${siswa.verval_data?.dokumen_ijazah ? `<small style="color: #666; margin-top: 5px; display: block;">📎 File sebelumnya: <a href="/uploads/ijazah/${siswa.verval_data.dokumen_ijazah}" target="_blank" style="color: #667eea; text-decoration: underline;">📥 Lihat</a></small>` : ''}
+                            
+                            <input type="file" id="dokumen_ijazah" name="dokumen_ijazah" accept=".jpg,.jpeg,.png" required>
+                            ${siswa.verval_data?.dokumen_ijazah ? `<small style="color: #666; margin-top: 5px; display: block;">📎 File saat ini: <a href="/uploads/ijazah/${siswa.verval_data.dokumen_ijazah}" target="_blank" style="color: #667eea; text-decoration: underline;">📥 Download Dokumen</a></small>` : ''}
                         </div>
 
                         <div class="button-group">
@@ -1071,14 +1025,9 @@ function formatDate(date) {
                     return;
                 }
 
-                // Validasi: Pastikan file ijazah sudah dipilih
-                const ijazahGalery = document.getElementById('ijazahGalery');
-                const ijazahCamera = document.getElementById('ijazahCamera');
-                const hasIjazah = (ijazahGalery && ijazahGalery.files && ijazahGalery.files.length > 0) || 
-                                  (ijazahCamera && ijazahCamera.files && ijazahCamera.files.length > 0);
-                
-                if (!hasIjazah) {
-                    showAlert('Silakan upload dokumen ijazah terlebih dahulu!', 'error');
+                // Validasi ukuran file sebelum submit
+                const fileInput = document.getElementById('dokumen_ijazah');
+                if (fileInput && fileInput.files && fileInput.files.length > 0) {
                     const file = fileInput.files[0];
                     const maxSize = 1 * 1024 * 1024; // 1MB
                     
@@ -1106,7 +1055,7 @@ function formatDate(date) {
                 }
                 
                 // Check for required Bagian B fields only
-                const requiredBagianB = ['nama_sd', 'tahun_ajaran_kelulusan'];
+                const requiredBagianB = ['nama_sd', 'tahun_ajaran_kelulusan', 'dokumen_ijazah'];
                 const missingBagianB = requiredBagianB.filter(f => !formEntries[f]);
                 if (missingBagianB.length > 0) {
                     console.warn('⚠️  Missing Bagian B fields:', missingBagianB);
