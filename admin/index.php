@@ -50,6 +50,19 @@ if (!isset($_SESSION['logged_in']) || $_SESSION['logged_in'] !== true) {
         .user-info strong {
             color: #667eea;
         }
+
+        /* Animation for badge notification */
+        @keyframes pulse {
+            0% {
+                box-shadow: 0 0 0 0 rgba(244, 67, 54, 0.7);
+            }
+            50% {
+                box-shadow: 0 0 0 8px rgba(244, 67, 54, 0);
+            }
+            100% {
+                box-shadow: 0 0 0 0 rgba(244, 67, 54, 0);
+            }
+        }
     </style>
 </head>
 <body>
@@ -76,6 +89,10 @@ if (!isset($_SESSION['logged_in']) || $_SESSION['logged_in'] !== true) {
             <!-- Toolbar -->
             <div style="display: flex; gap: 10px; margin-bottom: 20px; flex-wrap: wrap;">
                 <button id="btnOpenImport" class="button button-success">📥 Impor Data Siswa</button>
+                <button id="btnPengajuanPembatalan" class="button" style="background: #ff9800; color: white; position: relative;">
+                    📋 Pengajuan Pembatalan
+                    <span id="badgePengajuanCount" style="display: none; position: absolute; top: -8px; right: -8px; background: #f44336; color: white; border-radius: 50%; width: 24px; height: 24px; font-size: 12px; font-weight: bold; line-height: 24px; text-align: center; box-shadow: 0 2px 4px rgba(0,0,0,0.2); animation: pulse 2s infinite;">0</span>
+                </button>
                 <button id="btnDeleteAll" class="button button-danger">🗑️ Hapus Semua Data</button>
             </div>
 
@@ -197,6 +214,33 @@ if (!isset($_SESSION['logged_in']) || $_SESSION['logged_in'] !== true) {
                     <button type="submit" class="button button-success">Simpan Perubahan</button>
                 </div>
             </form>
+        </div>
+    </div>
+
+    <!-- Modal Pengajuan Pembatalan -->
+    <div id="pengajuanPembatalanModal" class="modal">
+        <div class="modal-content" style="max-width: 1000px;">
+            <div class="modal-header">
+                <h2>📋 Pengajuan Pembatalan Verval</h2>
+                <button class="close-modal">&times;</button>
+            </div>
+            <div style="padding: 20px;">
+                <!-- Filter Status Pengajuan -->
+                <div style="margin-bottom: 20px; display: flex; gap: 10px; align-items: center;">
+                    <label style="font-weight: 600;">Filter Status:</label>
+                    <select id="filterStatusPengajuan" style="padding: 8px 12px; border: 1px solid #ddd; border-radius: 4px;">
+                        <option value="all">Semua</option>
+                        <option value="menunggu" selected>Menunggu</option>
+                        <option value="disetujui">Disetujui</option>
+                        <option value="ditolak">Ditolak</option>
+                    </select>
+                    <button onclick="loadPengajuanPembatalan()" class="button button-primary" style="padding: 8px 15px;">Refresh</button>
+                </div>
+
+                <div id="pengajuanListContainer">
+                    <p style="text-align: center; padding: 20px; color: #999;">Memuat data pengajuan...</p>
+                </div>
+            </div>
         </div>
     </div>
 
@@ -330,6 +374,13 @@ if (!isset($_SESSION['logged_in']) || $_SESSION['logged_in'] !== true) {
             openModal('importModal');
         });
 
+        // Open pengajuan pembatalan modal
+        document.getElementById('btnPengajuanPembatalan').addEventListener('click', function() {
+            openModal('pengajuanPembatalanModal');
+            loadPengajuanPembatalan();
+            loadPengajuanCount(); // Refresh counter saat modal dibuka
+        });
+
         // Import form handler
         document.getElementById('importForm').addEventListener('submit', async function(e) {
             e.preventDefault();
@@ -426,6 +477,10 @@ if (!isset($_SESSION['logged_in']) || $_SESSION['logged_in'] !== true) {
         // Initial load on page load (load all data)
         document.addEventListener('DOMContentLoaded', function() {
             loadData();
+            loadPengajuanCount(); // Load notification count
+            
+            // Auto-refresh pengajuan count every 30 seconds
+            setInterval(loadPengajuanCount, 30000);
         });
 
         async function loadData() {
@@ -846,6 +901,209 @@ if (!isset($_SESSION['logged_in']) || $_SESSION['logged_in'] !== true) {
 
             return html;
         }
+
+        // ========================================
+        // PENGAJUAN PEMBATALAN FUNCTIONS
+        // ========================================
+        
+        // Load count pengajuan yang menunggu untuk badge notification
+        async function loadPengajuanCount() {
+            try {
+                const response = await fetch('../api/admin/count-pengajuan-menunggu.php');
+                const result = await response.json();
+
+                if (result.success) {
+                    updatePengajuanBadge(result.count);
+                }
+            } catch (error) {
+                console.error('Error loading pengajuan count:', error);
+            }
+        }
+
+        // Update badge counter
+        function updatePengajuanBadge(count) {
+            const badge = document.getElementById('badgePengajuanCount');
+            
+            if (count > 0) {
+                badge.textContent = count > 99 ? '99+' : count;
+                badge.style.display = 'block';
+            } else {
+                badge.style.display = 'none';
+            }
+        }
+
+        async function loadPengajuanPembatalan() {
+            try {
+                const statusFilter = document.getElementById('filterStatusPengajuan').value;
+                const container = document.getElementById('pengajuanListContainer');
+                
+                container.innerHTML = '<p style="text-align: center; padding: 20px; color: #999;">Memuat data pengajuan...</p>';
+
+                const response = await fetch(`../api/admin/get-pengajuan-pembatalan.php?status=${statusFilter}`);
+                const result = await response.json();
+
+                if (result.success) {
+                    if (result.data.length === 0) {
+                        container.innerHTML = `
+                            <div style="text-align: center; padding: 40px; color: #999;">
+                                <p style="font-size: 48px; margin: 0;">📭</p>
+                                <p>Tidak ada pengajuan pembatalan</p>
+                            </div>
+                        `;
+                        return;
+                    }
+
+                    let html = '<div style="display: flex; flex-direction: column; gap: 15px;">';
+                    
+                    result.data.forEach(pengajuan => {
+                        const statusBadge = getStatusBadge(pengajuan.status);
+                        const statusColor = pengajuan.status === 'menunggu' ? '#ff9800' : 
+                                          pengajuan.status === 'disetujui' ? '#4caf50' : '#f44336';
+                        
+                        html += `
+                            <div style="border: 1px solid #ddd; border-left: 4px solid ${statusColor}; border-radius: 4px; padding: 15px; background: white;">
+                                <div style="display: flex; justify-content: space-between; align-items: start; margin-bottom: 10px;">
+                                    <div>
+                                        <h4 style="margin: 0 0 5px 0; color: #333;">
+                                            📌 NISN: ${pengajuan.nisn} 
+                                            <span style="color: #666; font-weight: normal;">- ${pengajuan.nama_kk || pengajuan.nama_ijazah || '-'}</span>
+                                        </h4>
+                                        <p style="margin: 0; font-size: 13px; color: #999;">
+                                            Diajukan: ${new Date(pengajuan.created_at).toLocaleString('id-ID')}
+                                        </p>
+                                    </div>
+                                    <div>
+                                        ${statusBadge}
+                                    </div>
+                                </div>
+                                
+                                <div style="background: #f5f7fa; padding: 12px; border-radius: 4px; margin-bottom: 10px;">
+                                    <strong style="color: #666; font-size: 13px;">Alasan Pembatalan:</strong>
+                                    <p style="margin: 5px 0 0 0; color: #333;">${pengajuan.alasan}</p>
+                                </div>
+
+                                ${pengajuan.status !== 'menunggu' ? `
+                                    <div style="background: #e8f5e9; padding: 12px; border-radius: 4px; margin-bottom: 10px;">
+                                        <strong style="color: #666; font-size: 13px;">Diproses oleh: ${pengajuan.admin_username || 'Admin'}</strong>
+                                        <p style="margin: 5px 0 0 0; font-size: 13px;">Tanggal: ${new Date(pengajuan.tanggal_diproses).toLocaleString('id-ID')}</p>
+                                        ${pengajuan.catatan_admin ? `<p style="margin: 5px 0 0 0; color: #333;"><strong>Catatan:</strong> ${pengajuan.catatan_admin}</p>` : ''}
+                                    </div>
+                                ` : ''}
+
+                                ${pengajuan.status === 'menunggu' ? `
+                                    <div style="display: flex; gap: 10px; justify-content: flex-end;">
+                                        <button onclick="prosesPengajuan(${pengajuan.id}, 'setujui')" class="button button-success" style="padding: 8px 15px; font-size: 13px;">
+                                            ✅ Setujui
+                                        </button>
+                                        <button onclick="prosesPengajuan(${pengajuan.id}, 'tolak')" class="button button-danger" style="padding: 8px 15px; font-size: 13px;">
+                                            ❌ Tolak
+                                        </button>
+                                    </div>
+                                ` : ''}
+                            </div>
+                        `;
+                    });
+                    
+                    html += '</div>';
+                    container.innerHTML = html;
+                } else {
+                    container.innerHTML = `<p style="text-align: center; padding: 20px; color: #f44336;">${result.message}</p>`;
+                }
+            } catch (error) {
+                console.error('Error loading pengajuan:', error);
+                document.getElementById('pengajuanListContainer').innerHTML = 
+                    `<p style="text-align: center; padding: 20px; color: #f44336;">Terjadi kesalahan: ${error.message}</p>`;
+            }
+        }
+
+        function getStatusBadge(status) {
+            const badges = {
+                'menunggu': '<span style="background: #ff9800; color: white; padding: 5px 12px; border-radius: 20px; font-size: 12px; font-weight: 600;">⏳ Menunggu</span>',
+                'disetujui': '<span style="background: #4caf50; color: white; padding: 5px 12px; border-radius: 20px; font-size: 12px; font-weight: 600;">✅ Disetujui</span>',
+                'ditolak': '<span style="background: #f44336; color: white; padding: 5px 12px; border-radius: 20px; font-size: 12px; font-weight: 600;">❌ Ditolak</span>'
+            };
+            return badges[status] || status;
+        }
+
+        async function prosesPengajuan(pengajuanId, action) {
+            const actionText = action === 'setujui' ? 'menyetujui' : 'menolak';
+            const actionTextCap = action === 'setujui' ? 'Setujui' : 'Tolak';
+            
+            // Prompt untuk catatan admin
+            let catatan_admin = '';
+            if (typeof Swal !== 'undefined') {
+                const result = await Swal.fire({
+                    title: `${actionTextCap} Pengajuan?`,
+                    html: `
+                        <p>Anda yakin ingin ${actionText} pengajuan ini?</p>
+                        ${action === 'setujui' ? '<p style="color: #f44336; font-weight: bold;">Status verval siswa akan direset ke "belum"</p>' : ''}
+                        <textarea id="catatanAdmin" class="swal2-textarea" placeholder="Catatan (opsional)"></textarea>
+                    `,
+                    icon: 'question',
+                    showCancelButton: true,
+                    confirmButtonText: actionTextCap,
+                    confirmButtonColor: action === 'setujui' ? '#4caf50' : '#f44336',
+                    cancelButtonText: 'Batal',
+                    preConfirm: () => {
+                        return document.getElementById('catatanAdmin').value;
+                    }
+                });
+                
+                if (!result.isConfirmed) return;
+                catatan_admin = result.value || '';
+            } else {
+                if (!confirm(`Anda yakin ingin ${actionText} pengajuan ini?`)) return;
+                catatan_admin = prompt('Catatan (opsional):') || '';
+            }
+
+            try {
+                const response = await fetch('../api/admin/proses-pembatalan.php', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        pengajuan_id: pengajuanId,
+                        action: action,
+                        catatan_admin: catatan_admin
+                    })
+                });
+
+                const result = await response.json();
+
+                if (result.success) {
+                    if (typeof Swal !== 'undefined') {
+                        Swal.fire({
+                            icon: 'success',
+                            title: 'Berhasil!',
+                            text: result.message,
+                            confirmButtonText: 'OK'
+                        }).then(() => {
+                            loadPengajuanPembatalan();
+                            loadData(); // Refresh data siswa
+                            loadPengajuanCount(); // Refresh badge counter
+                        });
+                    } else {
+                        showAlert(result.message, 'success');
+                        setTimeout(() => {
+                            loadPengajuanPembatalan();
+                            loadData();
+                            loadPengajuanCount(); // Refresh badge counter
+                        }, 1500);
+                    }
+                } else {
+                    showAlert(result.message, 'error');
+                }
+            } catch (error) {
+                showAlert('Terjadi kesalahan: ' + error.message, 'error');
+                console.error('Error processing pengajuan:', error);
+            }
+        }
+
+        // Filter change listener
+        document.getElementById('filterStatusPengajuan').addEventListener('change', function() {
+            loadPengajuanPembatalan();
+        });
     </script>
 </body>
 </html>

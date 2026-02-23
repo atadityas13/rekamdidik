@@ -42,9 +42,33 @@ try {
     $conn->begin_transaction();
 
     try {
-        // 1. Get old value for history
+        // Validate field names to prevent SQL injection
+        $valid_field_names = [
+            'nik_kk', 'nama_kk', 'tempat_lahir_kk', 'tanggal_lahir_kk', 'jenis_kelamin_kk',
+            'nama_ibu_kk', 'nama_ayah_kk',
+            'nama_ijazah', 'tempat_lahir_ijazah', 'tanggal_lahir_ijazah', 'jenis_kelamin_ijazah',
+            'nama_ayah_ijazah'
+        ];
+        
+        $valid_verified_flags = [
+            'nik_kk_verified', 'nama_kk_verified', 'tempat_lahir_kk_verified',
+            'tanggal_lahir_kk_verified', 'jenis_kelamin_kk_verified', 'nama_ibu_kk_verified',
+            'nama_ayah_kk_verified', 'nisn_verified', 'nama_ijazah_verified',
+            'tempat_lahir_ijazah_verified', 'tanggal_lahir_ijazah_verified',
+            'jenis_kelamin_ijazah_verified', 'nama_ayah_ijazah_verified'
+        ];
+        
+        // Validate verified flag
+        if (!in_array($verified_flag, $valid_verified_flags)) {
+            throw new Exception('Invalid verified flag: ' . $verified_flag);
+        }
+        
+        // Check if field_name is provided and valid
+        $has_editable_field = !empty($field_name) && in_array($field_name, $valid_field_names);
+
+        // 1. Get old value for history (only if has editable field)
         $old_value = null;
-        if ($is_verified && !empty($field_name)) {
+        if ($is_verified && $has_editable_field) {
             $stmt = $conn->prepare("SELECT `$field_name` FROM siswa WHERE id = ?");
             if ($stmt) {
                 $stmt->bind_param('i', $siswa_id);
@@ -57,8 +81,8 @@ try {
             }
         }
 
-        // 2. Update data field (jika ada perubahan) + verified flag
-        if ($is_verified && !empty($field_name)) {
+        // 2. Update data field + verified flag (or just verified flag)
+        if ($is_verified && $has_editable_field) {
             // Save field data + verified flag
             $stmt = $conn->prepare("UPDATE siswa SET `$field_name` = ?, `$verified_flag` = ? WHERE id = ?");
             if (!$stmt) {
@@ -82,7 +106,7 @@ try {
                 }
             }
         } else {
-            // Just update verified flag (uncheck)
+            // Just update verified flag (either checking field without edit, or unchecking)
             $stmt = $conn->prepare("UPDATE siswa SET `$verified_flag` = ? WHERE id = ?");
             if (!$stmt) {
                 throw new Exception('Prepare failed: ' . $conn->error);

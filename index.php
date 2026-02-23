@@ -204,8 +204,10 @@
                     resultContainer.innerHTML = buildResultHTML(siswa);
                     resultContainer.style.display = 'block';
                     
-                    // Setup event listeners for result
-                    setupResultEventListeners(siswa.id, siswa.verval_status);
+                    // Setup event listeners hanya jika belum verval (ada form)
+                    if (siswa.verval_status !== 'sudah') {
+                        setupResultEventListeners(siswa.id, siswa.verval_status);
+                    }
                 } else {
                     showAlert(response.message, 'error');
                 }
@@ -215,7 +217,253 @@
             }
         });
 
+        function buildDataViewHTML(siswa) {
+            // Halaman read-only untuk siswa yang sudah verval
+            const formatDate = (date) => {
+                if (!date) return '-';
+                const d = new Date(date);
+                return d.toLocaleDateString('id-ID', { day: '2-digit', month: 'long', year: 'numeric' });
+            };
+
+            const formatTime = (datetime) => {
+                if (!datetime) return '-';
+                const d = new Date(datetime);
+                return d.toLocaleString('id-ID', { 
+                    day: '2-digit', 
+                    month: 'long', 
+                    year: 'numeric',
+                    hour: '2-digit',
+                    minute: '2-digit'
+                });
+            };
+
+            let html = `
+                <div class="alert alert-success" style="margin-bottom: 30px;">
+                    <div style="display: flex; align-items: center; gap: 15px;">
+                        <div style="font-size: 48px;">✅</div>
+                        <div>
+                            <h3 style="margin: 0 0 5px 0; color: #388e3c;">Data Anda Sudah Terverifikasi</h3>
+                            <p style="margin: 0;">Terima kasih telah melakukan verifikasi dan rekam data. Silakan simpan halaman ini sebagai bukti.</p>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="data-section">
+                    <h3 style="color: #667eea; margin-bottom: 15px;">📋 Data Dasar Siswa</h3>
+                    <div class="data-row" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 20px;">
+                        <div class="data-field">
+                            <label style="font-weight: 600; color: #666; display: block; margin-bottom: 5px;">NISN</label>
+                            <p style="margin: 0; font-size: 16px;">${siswa.nisn}</p>
+                        </div>
+                        <div class="data-field">
+                            <label style="font-weight: 600; color: #666; display: block; margin-bottom: 5px;">Status Verval</label>
+                            <p style="margin: 0;"><span class="status-badge status-sudah">Sudah Verval</span></p>
+                        </div>
+                        <div class="data-field">
+                            <label style="font-weight: 600; color: #666; display: block; margin-bottom: 5px;">Terakhir Diupdate</label>
+                            <p style="margin: 0; font-size: 14px;">${formatTime(siswa.updated_at)}</p>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="data-section">
+                    <h3 style="color: #667eea; margin-bottom: 15px;">📄 Data dari Kartu Keluarga (KK)</h3>
+                    <div class="data-row" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 20px;">
+                        <div class="data-field">
+                            <label style="font-weight: 600; color: #666; display: block; margin-bottom: 5px;">NIK</label>
+                            <p style="margin: 0 0 3px 0; font-size: 16px;">${siswa.nik_kk || '-'}</p>
+                            <small style="color: ${siswa.nik_kk_verified ? '#388e3c' : '#999'};">
+                                ${siswa.nik_kk_verified ? '✓ Terverifikasi' : '○ Belum terverifikasi'}
+                            </small>
+                        </div>
+                        <div class="data-field">
+                            <label style="font-weight: 600; color: #666; display: block; margin-bottom: 5px;">Nama</label>
+                            <p style="margin: 0 0 3px 0; font-size: 16px;">${siswa.nama_kk || '-'}</p>
+                            <small style="color: ${siswa.nama_kk_verified ? '#388e3c' : '#999'};">
+                                ${siswa.nama_kk_verified ? '✓ Terverifikasi' : '○ Belum terverifikasi'}
+                            </small>
+                        </div>
+                        <div class="data-field">
+                            <label style="font-weight: 600; color: #666; display: block; margin-bottom: 5px;">Tempat Lahir</label>
+                            <p style="margin: 0 0 3px 0; font-size: 16px;">${siswa.tempat_lahir_kk || '-'}</p>
+                            <small style="color: ${siswa.tempat_lahir_kk_verified ? '#388e3c' : '#999'};">
+                                ${siswa.tempat_lahir_kk_verified ? '✓ Terverifikasi' : '○ Belum terverifikasi'}
+                            </small>
+                        </div>
+                        <div class="data-field">
+                            <label style="font-weight: 600; color: #666; display: block; margin-bottom: 5px;">Tanggal Lahir</label>
+                            <p style="margin: 0 0 3px 0; font-size: 16px;">${formatDate(siswa.tanggal_lahir_kk)}</p>
+                            <small style="color: ${siswa.tanggal_lahir_kk_verified ? '#388e3c' : '#999'};">
+                                ${siswa.tanggal_lahir_kk_verified ? '✓ Terverifikasi' : '○ Belum terverifikasi'}
+                            </small>
+                        </div>
+                        <div class="data-field">
+                            <label style="font-weight: 600; color: #666; display: block; margin-bottom: 5px;">Jenis Kelamin</label>
+                            <p style="margin: 0 0 3px 0; font-size: 16px;">${siswa.jenis_kelamin_kk === 'L' ? 'Laki-laki' : siswa.jenis_kelamin_kk === 'P' ? 'Perempuan' : '-'}</p>
+                            <small style="color: ${siswa.jenis_kelamin_kk_verified ? '#388e3c' : '#999'};">
+                                ${siswa.jenis_kelamin_kk_verified ? '✓ Terverifikasi' : '○ Belum terverifikasi'}
+                            </small>
+                        </div>
+                        <div class="data-field">
+                            <label style="font-weight: 600; color: #666; display: block; margin-bottom: 5px;">Nama Ibu Kandung</label>
+                            <p style="margin: 0 0 3px 0; font-size: 16px;">${siswa.nama_ibu_kk || '-'}</p>
+                            <small style="color: ${siswa.nama_ibu_kk_verified ? '#388e3c' : '#999'};">
+                                ${siswa.nama_ibu_kk_verified ? '✓ Terverifikasi' : '○ Belum terverifikasi'}
+                            </small>
+                        </div>
+                        <div class="data-field">
+                            <label style="font-weight: 600; color: #666; display: block; margin-bottom: 5px;">Nama Ayah Kandung</label>
+                            <p style="margin: 0 0 3px 0; font-size: 16px;">${siswa.nama_ayah_kk || '-'}</p>
+                            <small style="color: ${siswa.nama_ayah_kk_verified ? '#388e3c' : '#999'};">
+                                ${siswa.nama_ayah_kk_verified ? '✓ Terverifikasi' : '○ Belum terverifikasi'}
+                            </small>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="data-section">
+                    <h3 style="color: #667eea; margin-bottom: 15px;">📜 Data dari Ijazah</h3>
+                    <div class="data-row" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 20px;">
+                        <div class="data-field">
+                            <label style="font-weight: 600; color: #666; display: block; margin-bottom: 5px;">NISN</label>
+                            <p style="margin: 0 0 3px 0; font-size: 16px;">${siswa.nisn || '-'}</p>
+                            <small style="color: ${siswa.nisn_verified ? '#388e3c' : '#999'};">
+                                ${siswa.nisn_verified ? '✓ Terverifikasi' : '○ Belum terverifikasi'}
+                            </small>
+                        </div>
+                        <div class="data-field">
+                            <label style="font-weight: 600; color: #666; display: block; margin-bottom: 5px;">Nama</label>
+                            <p style="margin: 0 0 3px 0; font-size: 16px;">${siswa.nama_ijazah || '-'}</p>
+                            <small style="color: ${siswa.nama_ijazah_verified ? '#388e3c' : '#999'};">
+                                ${siswa.nama_ijazah_verified ? '✓ Terverifikasi' : '○ Belum terverifikasi'}
+                            </small>
+                        </div>
+                        <div class="data-field">
+                            <label style="font-weight: 600; color: #666; display: block; margin-bottom: 5px;">Tempat Lahir</label>
+                            <p style="margin: 0 0 3px 0; font-size: 16px;">${siswa.tempat_lahir_ijazah || '-'}</p>
+                            <small style="color: ${siswa.tempat_lahir_ijazah_verified ? '#388e3c' : '#999'};">
+                                ${siswa.tempat_lahir_ijazah_verified ? '✓ Terverifikasi' : '○ Belum terverifikasi'}
+                            </small>
+                        </div>
+                        <div class="data-field">
+                            <label style="font-weight: 600; color: #666; display: block; margin-bottom: 5px;">Tanggal Lahir</label>
+                            <p style="margin: 0 0 3px 0; font-size: 16px;">${formatDate(siswa.tanggal_lahir_ijazah)}</p>
+                            <small style="color: ${siswa.tanggal_lahir_ijazah_verified ? '#388e3c' : '#999'};">
+                                ${siswa.tanggal_lahir_ijazah_verified ? '✓ Terverifikasi' : '○ Belum terverifikasi'}
+                            </small>
+                        </div>
+                        <div class="data-field">
+                            <label style="font-weight: 600; color: #666; display: block; margin-bottom: 5px;">Jenis Kelamin</label>
+                            <p style="margin: 0 0 3px 0; font-size: 16px;">${siswa.jenis_kelamin_ijazah === 'L' ? 'Laki-laki' : siswa.jenis_kelamin_ijazah === 'P' ? 'Perempuan' : '-'}</p>
+                            <small style="color: ${siswa.jenis_kelamin_ijazah_verified ? '#388e3c' : '#999'};">
+                                ${siswa.jenis_kelamin_ijazah_verified ? '✓ Terverifikasi' : '○ Belum terverifikasi'}
+                            </small>
+                        </div>
+                        <div class="data-field">
+                            <label style="font-weight: 600; color: #666; display: block; margin-bottom: 5px;">Nama Ayah Kandung</label>
+                            <p style="margin: 0 0 3px 0; font-size: 16px;">${siswa.nama_ayah_ijazah || '-'}</p>
+                            <small style="color: ${siswa.nama_ayah_ijazah_verified ? '#388e3c' : '#999'};">
+                                ${siswa.nama_ayah_ijazah_verified ? '✓ Terverifikasi' : '○ Belum terverifikasi'}
+                            </small>
+                        </div>
+                    </div>
+                </div>
+
+                ${siswa.verval_data ? `
+                    <div class="data-section">
+                        <h3 style="color: #667eea; margin-bottom: 15px;">🏫 Data Verval Jenjang Sebelumnya</h3>
+                        <div class="data-row" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 20px;">
+                            <div class="data-field">
+                                <label style="font-weight: 600; color: #666; display: block; margin-bottom: 5px;">Nama Sekolah Dasar (SD)</label>
+                                <p style="margin: 0; font-size: 16px;">${siswa.verval_data.nama_sd || '-'}</p>
+                            </div>
+                            <div class="data-field">
+                                <label style="font-weight: 600; color: #666; display: block; margin-bottom: 5px;">Tahun Ajaran Kelulusan</label>
+                                <p style="margin: 0; font-size: 16px;">${siswa.verval_data.tahun_ajaran_kelulusan || '-'}</p>
+                            </div>
+                            <div class="data-field">
+                                <label style="font-weight: 600; color: #666; display: block; margin-bottom: 5px;">NIP Kepala Sekolah</label>
+                                <p style="margin: 0; font-size: 16px;">${siswa.verval_data.nip_kepala_sekolah || '-'}</p>
+                            </div>
+                            <div class="data-field">
+                                <label style="font-weight: 600; color: #666; display: block; margin-bottom: 5px;">Nama Kepala Sekolah</label>
+                                <p style="margin: 0; font-size: 16px;">${siswa.verval_data.nama_kepala_sekolah || '-'}</p>
+                            </div>
+                            <div class="data-field">
+                                <label style="font-weight: 600; color: #666; display: block; margin-bottom: 5px;">Nomor Seri Ijazah</label>
+                                <p style="margin: 0; font-size: 16px;">${siswa.verval_data.nomor_seri_ijazah || '-'}</p>
+                            </div>
+                            <div class="data-field">
+                                <label style="font-weight: 600; color: #666; display: block; margin-bottom: 5px;">Tanggal Terbit Ijazah</label>
+                                <p style="margin: 0; font-size: 16px;">${formatDate(siswa.verval_data.tanggal_terbit_ijazah)}</p>
+                            </div>
+                            <div class="data-field">
+                                <label style="font-weight: 600; color: #666; display: block; margin-bottom: 5px;">Dokumen Ijazah</label>
+                                <p style="margin: 0;">${siswa.verval_data.dokumen_ijazah 
+                                    ? '<a href="/uploads/ijazah/' + siswa.verval_data.dokumen_ijazah + '" target="_blank" style="color: #667eea; text-decoration: underline;">📄 Lihat Dokumen</a>'
+                                    : '-'}</p>
+                            </div>
+                        </div>
+                    </div>
+                ` : ''}
+
+                ${siswa.history_perbaikan && siswa.history_perbaikan.length > 0 ? `
+                    <div class="data-section">
+                        <h3 style="color: #667eea; margin-bottom: 15px;">📝 Riwayat Perbaikan Data</h3>
+                        <div style="overflow-x: auto;">
+                            <table style="width: 100%; border-collapse: collapse;">
+                                <thead>
+                                    <tr style="background: #f5f7fa;">
+                                        <th style="padding: 12px; text-align: left; border-bottom: 2px solid #ddd;">Field</th>
+                                        <th style="padding: 12px; text-align: left; border-bottom: 2px solid #ddd;">Nilai Sebelum</th>
+                                        <th style="padding: 12px; text-align: left; border-bottom: 2px solid #ddd;">Nilai Sesudah</th>
+                                        <th style="padding: 12px; text-align: left; border-bottom: 2px solid #ddd;">Tanggal Perbaikan</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    ${siswa.history_perbaikan.map(item => `
+                                        <tr>
+                                            <td style="padding: 10px; border-bottom: 1px solid #eee;"><strong>${item.field_name}</strong></td>
+                                            <td style="padding: 10px; border-bottom: 1px solid #eee;">${item.nilai_sebelum || '-'}</td>
+                                            <td style="padding: 10px; border-bottom: 1px solid #eee;">${item.nilai_sesudah || '-'}</td>
+                                            <td style="padding: 10px; border-bottom: 1px solid #eee;">${formatTime(item.tanggal_perbaikan)}</td>
+                                        </tr>
+                                    `).join('')}
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                ` : ''}
+
+                <!-- Section Pengajuan Pembatalan -->
+                <div id="pengajuanPembatalanSection" style="margin-top: 30px;">
+                    <!-- Will be loaded dynamically -->
+                </div>
+
+                <div style="margin-top: 30px; padding: 20px; background: #f5f7fa; border-radius: 8px; text-align: center;">
+                    <p style="margin: 0 0 15px 0; color: #666;">Terima kasih telah melakukan verifikasi dan rekam data dengan benar.</p>
+                    <button type="button" onclick="window.print()" class="btn-primary" style="margin-right: 10px;">
+                        🖨️ Cetak Halaman
+                    </button>
+                    <button type="button" onclick="location.reload()" class="btn-secondary">
+                        🔄 Cek Lagi
+                    </button>
+                </div>
+            `;
+
+            // Load status pengajuan pembatalan after rendering
+            setTimeout(() => loadPengajuanPembatalanStatus(siswa.id), 500);
+
+            return html;
+        }
+
         function buildResultHTML(siswa) {
+            // Jika sudah verval, tampilkan halaman data read-only
+            if (siswa.verval_status === 'sudah') {
+                return buildDataViewHTML(siswa);
+            }
+
+            // Jika belum verval, tampilkan form verifikasi
             const statusClass = siswa.verval_status === 'sudah' ? 'status-sudah' : 'status-belum';
             const statusText = siswa.verval_status === 'sudah' ? 'Sudah Melakukan Verval' : 'Belum Melakukan Verval';
             const statusMessage = siswa.verval_status === 'sudah' 
@@ -262,7 +510,7 @@
                                     <td class="compare-label" data-label="">NISN</td>
                                     <td class="compare-cell muted" data-label="Data pada Kartu Keluarga">-</td>
                                     <td class="compare-cell" data-label="Data pada Ijazah">
-                                        <input type="text" id="nisn_ijazah" value="${siswa.nisn}" disabled>
+                                        <input type="text" id="nisn_ijazah" value="${siswa.nisn}" disabled data-always-disabled="true">
                                         <div class="checkbox-group compact">
                                             <input type="checkbox" class="verify-checkbox" data-verify-field="nisn_verified" data-target-input="nisn_ijazah" ${checkedAttr(siswa.nisn_verified)}>
                                             <label>Sudah sesuai</label>
@@ -504,8 +752,12 @@
 
             document.querySelectorAll('.verify-checkbox').forEach(checkbox => {
                 checkbox.addEventListener('change', async function() {
+                    console.log('🔔 Checkbox clicked');
+                    
                     const fieldName = this.getAttribute('data-verify-field');
                     const targetInputId = this.getAttribute('data-target-input');
+
+                    console.log('📋 Field info:', { fieldName, targetInputId });
 
                     const labels = {
                         nik_kk_verified: 'NIK',
@@ -546,6 +798,8 @@
                         }
                     }
 
+                    console.log('📝 Value info:', { actualFieldName, fieldValue, valueText });
+
                     const labelText = labels[fieldName] || 'Data';
                     const isChecking = this.checked;
                     const valueSuffix = valueText ? ` "${valueText}"` : '';
@@ -568,6 +822,8 @@
                         confirmed = window.confirm(confirmText);
                     }
 
+                    console.log('✅ User confirmed:', confirmed);
+
                     if (!confirmed) {
                         this.checked = !isChecking;
                         return;
@@ -575,7 +831,14 @@
 
                     try {
                         // NEW: Save data field + verified flag sekaligus
-                        const response = await apiCall('/api/save-field-verified.php', 'POST', {
+                        const formData = new FormData();
+                        formData.append('siswa_id', siswaId);
+                        formData.append('field_name', actualFieldName);
+                        formData.append('field_value', fieldValue);
+                        formData.append('verified_flag', fieldName);
+                        formData.append('is_verified', isChecking ? 1 : 0);
+
+                        console.log('📤 Sending verification request:', {
                             siswa_id: siswaId,
                             field_name: actualFieldName,
                             field_value: fieldValue,
@@ -583,25 +846,44 @@
                             is_verified: isChecking ? 1 : 0
                         });
 
-                        if (response.success) {
+                        const response = await fetch('/api/save-field-verified.php', {
+                            method: 'POST',
+                            body: formData
+                        });
+
+                        console.log('📡 Response status:', response.status, response.statusText);
+
+                        if (!response.ok) {
+                            throw new Error(`HTTP error! status: ${response.status}`);
+                        }
+
+                        const result = await response.json();
+                        console.log('📥 Response:', result);
+
+                        if (result.success) {
+                            // Disable/enable target input based on verification status
                             if (targetInputId) {
                                 const target = document.getElementById(targetInputId);
-                                if (target) {
+                                if (target && !target.hasAttribute('data-always-disabled')) {
+                                    console.log('🔒 Setting field disabled:', isChecking);
                                     target.disabled = isChecking;
                                 }
                             }
-                            showAlert(response.message, 'success');
+                            
+                            showAlert(result.message, 'success');
                             
                             // Update status jika semua sudah verified
-                            if (response.status_updated === 'sudah') {
-                                showAlert('Semua data Bagian A sudah diverifikasi! ✓', 'success');
+                            if (result.status_updated === 'sudah') {
+                                showAlert('✅ Semua data Bagian A sudah diverifikasi! Status akan diupdate setelah Bagian B disimpan.', 'success');
                                 setTimeout(() => location.reload(), 1500);
                             }
                         } else {
+                            console.warn('⚠️ Save failed:', result.message);
                             this.checked = !isChecking;
-                            showAlert(response.message, 'error');
+                            showAlert(result.message, 'error');
                         }
                     } catch (error) {
+                        console.error('❌ Error:', error);
                         this.checked = !isChecking;
                         showAlert('Terjadi kesalahan: ' + error.message, 'error');
                     }
@@ -673,10 +955,24 @@
 
                     if (result.success) {
                         console.log('✅ Bagian B saved:', result);
-                        showAlert(result.message, 'success');
-                        setTimeout(() => {
-                            location.reload();
-                        }, 2000);
+                        
+                        if (typeof Swal !== 'undefined') {
+                            Swal.fire({
+                                icon: 'success',
+                                title: 'Berhasil!',
+                                html: '<p>Data verval Anda telah berhasil disimpan.</p><p>Halaman akan menampilkan data verval Anda dalam beberapa saat...</p>',
+                                timer: 2500,
+                                timerProgressBar: true,
+                                showConfirmButton: false
+                            }).then(() => {
+                                location.reload();
+                            });
+                        } else {
+                            showAlert(result.message, 'success');
+                            setTimeout(() => {
+                                location.reload();
+                            }, 2000);
+                        }
                     } else {
                         console.error('❌ Error:', result.message);
                         showAlert(result.message, 'error');
@@ -686,6 +982,175 @@
                     showAlert('Terjadi kesalahan: ' + error.message, 'error');
                 }
             });
+        }
+
+        // ========================================
+        // PENGAJUAN PEMBATALAN VERVAL
+        // ========================================
+        async function loadPengajuanPembatalanStatus(siswaId) {
+            try {
+                const response = await fetch(`/api/check-pengajuan-pembatalan.php?siswa_id=${siswaId}`);
+                const result = await response.json();
+
+                if (result.success) {
+                    const container = document.getElementById('pengajuanPembatalanSection');
+                    
+                    if (result.has_pengajuan && result.data) {
+                        const pengajuan = result.data;
+                        
+                        if (pengajuan.status === 'menunggu') {
+                            // Ada pengajuan yang sedang menunggu
+                            container.innerHTML = `
+                                <div class="data-section" style="border-left: 4px solid #ff9800;">
+                                    <h3 style="color: #ff9800; margin-bottom: 15px;">⏳ Pengajuan Pembatalan Sedang Diproses</h3>
+                                    <div class="alert" style="background: #fff3e0; border: 1px solid #ff9800; color: #e65100;">
+                                        <p style="margin: 0 0 10px 0;"><strong>Status:</strong> Menunggu Persetujuan Admin</p>
+                                        <p style="margin: 0 0 10px 0;"><strong>Tanggal Pengajuan:</strong> ${new Date(pengajuan.created_at).toLocaleString('id-ID')}</p>
+                                        <p style="margin: 0;"><strong>Alasan:</strong></p>
+                                        <p style="margin: 5px 0 0 0; padding: 10px; background: white; border-radius: 4px;">${pengajuan.alasan}</p>
+                                    </div>
+                                </div>
+                            `;
+                        } else if (pengajuan.status === 'ditolak') {
+                            // Pengajuan ditolak, bisa ajukan lagi
+                            container.innerHTML = buildPengajuanFormHTML(siswaId, pengajuan);
+                        } else if (pengajuan.status === 'disetujui') {
+                            // Pengajuan disetujui (harusnya gak mungkin sampai sini karena status verval sudah berubah)
+                            container.innerHTML = `
+                                <div class="data-section" style="border-left: 4px solid #4caf50;">
+                                    <h3 style="color: #4caf50; margin-bottom: 15px;">✅ Pengajuan Pembatalan Disetujui</h3>
+                                    <div class="alert alert-success">
+                                        <p style="margin: 0;">Pengajuan pembatalan Anda telah disetujui oleh admin. Status verval Anda telah direset.</p>
+                                    </div>
+                                </div>
+                            `;
+                        }
+                    } else {
+                        // Belum ada pengajuan, tampilkan form
+                        container.innerHTML = buildPengajuanFormHTML(siswaId, null);
+                    }
+                }
+            } catch (error) {
+                console.error('Error loading pengajuan status:', error);
+            }
+        }
+
+        function buildPengajuanFormHTML(siswaId, pengajuanSebelumnya) {
+            let html = `
+                <div class="data-section" style="border-left: 4px solid #f44336;">
+                    <h3 style="color: #f44336; margin-bottom: 15px;">🔄 Pengajuan Pembatalan Verval</h3>
+            `;
+
+            if (pengajuanSebelumnya && pengajuanSebelumnya.status === 'ditolak') {
+                html += `
+                    <div class="alert" style="background: #ffebee; border: 1px solid #f44336; color: #c62828; margin-bottom: 20px;">
+                        <p style="margin: 0 0 10px 0;"><strong>❌ Pengajuan Sebelumnya Ditolak</strong></p>
+                        <p style="margin: 0 0 10px 0;"><strong>Tanggal:</strong> ${new Date(pengajuanSebelumnya.tanggal_diproses).toLocaleString('id-ID')}</p>
+                        ${pengajuanSebelumnya.catatan_admin ? `<p style="margin: 0;"><strong>Catatan Admin:</strong> ${pengajuanSebelumnya.catatan_admin}</p>` : ''}
+                    </div>
+                `;
+            }
+
+            html += `
+                    <p style="margin-bottom: 15px; color: #666;">
+                        Jika Anda menemukan kesalahan pada data yang telah diverifikasi, Anda dapat mengajukan pembatalan verval.
+                        Pengajuan akan ditinjau oleh admin.
+                    </p>
+                    <form id="formPengajuanPembatalan" onsubmit="submitPengajuanPembatalan(event, ${siswaId})">
+                        <div style="margin-bottom: 15px;">
+                            <label style="display: block; font-weight: 600; margin-bottom: 8px; color: #333;">
+                                Alasan Pembatalan<span style="color: red;">*</span>
+                            </label>
+                            <textarea 
+                                name="alasan" 
+                                id="alasanPembatalan" 
+                                rows="5" 
+                                required 
+                                minlength="20"
+                                placeholder="Jelaskan alasan pembatalan verval (minimal 20 karakter)"
+                                style="width: 100%; padding: 12px; border: 1px solid #ddd; border-radius: 4px; font-size: 14px; font-family: inherit; resize: vertical;"
+                            ></textarea>
+                            <small style="color: #999;">Minimal 20 karakter. Jelaskan dengan detail alasan pembatalan.</small>
+                        </div>
+                        <div style="display: flex; gap: 10px; align-items: center;">
+                            <button type="submit" class="btn-primary" style="background: #f44336;">
+                                📨 Ajukan Pembatalan
+                            </button>
+                            <small style="color: #999;">Status verval akan direset setelah disetujui admin</small>
+                        </div>
+                    </form>
+                </div>
+            `;
+
+            return html;
+        }
+
+        async function submitPengajuanPembatalan(event, siswaId) {
+            event.preventDefault();
+
+            const form = event.target;
+            const alasan = form.alasan.value.trim();
+
+            if (alasan.length < 20) {
+                showAlert('Alasan pembatalan minimal 20 karakter', 'error');
+                return;
+            }
+
+            // Konfirmasi
+            let confirmed = false;
+            if (typeof Swal !== 'undefined') {
+                const result = await Swal.fire({
+                    title: 'Konfirmasi Pengajuan Pembatalan',
+                    html: `
+                        <p>Anda yakin ingin mengajukan pembatalan verval?</p>
+                        <p style="color: #f44336; font-weight: bold;">Pengajuan ini akan ditinjau oleh admin.</p>
+                    `,
+                    icon: 'warning',
+                    showCancelButton: true,
+                    confirmButtonText: 'Ya, Ajukan',
+                    confirmButtonColor: '#f44336',
+                    cancelButtonText: 'Batal'
+                });
+                confirmed = result.isConfirmed;
+            } else {
+                confirmed = window.confirm('Anda yakin ingin mengajukan pembatalan verval?');
+            }
+
+            if (!confirmed) return;
+
+            try {
+                const formData = new FormData();
+                formData.append('siswa_id', siswaId);
+                formData.append('alasan', alasan);
+
+                const response = await fetch('/api/submit-pembatalan.php', {
+                    method: 'POST',
+                    body: formData
+                });
+
+                const result = await response.json();
+
+                if (result.success) {
+                    if (typeof Swal !== 'undefined') {
+                        Swal.fire({
+                            icon: 'success',
+                            title: 'Berhasil!',
+                            text: result.message,
+                            confirmButtonText: 'OK'
+                        }).then(() => {
+                            location.reload();
+                        });
+                    } else {
+                        showAlert(result.message, 'success');
+                        setTimeout(() => location.reload(), 2000);
+                    }
+                } else {
+                    showAlert(result.message, 'error');
+                }
+            } catch (error) {
+                showAlert('Terjadi kesalahan: ' + error.message, 'error');
+                console.error('Error submitting pembatalan:', error);
+            }
         }
     </script>
 </body>

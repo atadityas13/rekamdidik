@@ -124,6 +124,33 @@ CREATE TABLE admin_users (
 );
 
 -- =====================================================
+-- Table: pengajuan_pembatalan (Pengajuan Pembatalan Verval)
+-- =====================================================
+CREATE TABLE pengajuan_pembatalan (
+    id INT PRIMARY KEY AUTO_INCREMENT,
+    siswa_id INT NOT NULL,
+    
+    -- Data Pengajuan
+    alasan TEXT NOT NULL,
+    status ENUM('menunggu', 'disetujui', 'ditolak') DEFAULT 'menunggu',
+    
+    -- Data Admin Response
+    admin_id INT,
+    catatan_admin TEXT,
+    tanggal_diproses TIMESTAMP NULL,
+    
+    -- Timestamps
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    
+    FOREIGN KEY (siswa_id) REFERENCES siswa(id) ON DELETE CASCADE,
+    FOREIGN KEY (admin_id) REFERENCES admin_users(id) ON DELETE SET NULL,
+    INDEX idx_siswa_id (siswa_id),
+    INDEX idx_status (status),
+    INDEX idx_created (created_at)
+);
+
+-- =====================================================
 -- Insert Default Admin User
 -- =====================================================
 INSERT INTO admin_users (username, password, email, nama_lengkap, role) VALUES 
