@@ -268,7 +268,11 @@ try {
             'history_items' => count($history),
             'verified_count' => array_sum($verified_updates),
             'dokumen_uploaded' => !empty($dokumen_ijazah),
-            'status' => 'sudah'
+            'status' => 'sudah',
+            'debug' => [
+                'po_fields_received' => array_keys($_POST),
+                'verified_flags_sent' => array_filter($verified_updates) // Only show enabled flags
+            ]
         ];
 
     } catch (Exception $e) {
