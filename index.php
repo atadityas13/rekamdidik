@@ -528,9 +528,16 @@
                         : 'Ijazah';
 
                     let valueText = '';
+                    let fieldValue = '';
+                    let actualFieldName = '';
+                    
                     if (targetInputId) {
                         const target = document.getElementById(targetInputId);
                         if (target) {
+                            // Get actual field name (remove _kk or _ijazah suffix from target id)
+                            actualFieldName = targetInputId;
+                            fieldValue = target.value;
+                            
                             if (target.tagName === 'SELECT') {
                                 valueText = target.options[target.selectedIndex] ? target.options[target.selectedIndex].text : '';
                             } else {
@@ -567,10 +574,13 @@
                     }
 
                     try {
-                        const response = await apiCall('/api/update-verified.php', 'POST', {
+                        // NEW: Save data field + verified flag sekaligus
+                        const response = await apiCall('/api/save-field-verified.php', 'POST', {
                             siswa_id: siswaId,
-                            field_name: fieldName,
-                            value: isChecking ? 1 : 0
+                            field_name: actualFieldName,
+                            field_value: fieldValue,
+                            verified_flag: fieldName,
+                            is_verified: isChecking ? 1 : 0
                         });
 
                         if (response.success) {
@@ -581,6 +591,12 @@
                                 }
                             }
                             showAlert(response.message, 'success');
+                            
+                            // Update status jika semua sudah verified
+                            if (response.status_updated === 'sudah') {
+                                showAlert('Semua data Bagian A sudah diverifikasi! ✓', 'success');
+                                setTimeout(() => location.reload(), 1500);
+                            }
                         } else {
                             this.checked = !isChecking;
                             showAlert(response.message, 'error');
@@ -592,18 +608,7 @@
                 });
             });
 
-            // Helper function to ensure checkboxes have name attribute for FormData
-            function ensureCheckboxNames() {
-                document.querySelectorAll('.verify-checkbox').forEach(checkbox => {
-                    const verifyField = checkbox.getAttribute('data-verify-field');
-                    if (verifyField && !checkbox.getAttribute('name')) {
-                        checkbox.setAttribute('name', verifyField);
-                        checkbox.setAttribute('value', '1');
-                    }
-                });
-            }
-
-            // Handle verval form submission
+            // Handle verval form submission (Bagian B only)
             document.getElementById('vervalForm').addEventListener('submit', async function(e) {
                 e.preventDefault();
 
@@ -634,44 +639,32 @@
                     return;
                 }
 
-                // Ensure all checkboxes have name attribute before collecting FormData
-                ensureCheckboxNames();
-
-                // IMPORTANT: Disabled fields don't get included in FormData
-                // First, log how many fields are disabled
-                const allInputs = this.querySelectorAll('input[type="text"], input[type="date"], select');
-                const disabledCount = Array.from(allInputs).filter(i => i.disabled).length;
-                console.log(`🔒 Total inputs: ${allInputs.length}, Disabled: ${disabledCount}`);
-
-                // Temporarily enable all fields to collect their values
-                allInputs.forEach(input => {
-                    input.disabled = false;
-                });
-
+                // Collect form data (only Bagian B fields will be used)
                 const formData = new FormData(this);
                 
-                // Debug: Log all form data being sent with detailed breakdown
-                console.log('📤 Form Data Submitted:');
+                // Debug: Log all form data being sent
+                console.log('📤 Form Data Submitted (Bagian B):');
                 const formEntries = {};
                 for (let [key, value] of formData.entries()) {
                     if (key === 'dokumen_ijazah') {
                         console.log(`  ${key}: [File: ${value.name}]`);
                         formEntries[key] = `[File: ${value.name}]`;
-                    } else {
+                    } else if (!key.includes('_verified') && !['nik_kk', 'nama_kk', 'nama_ijazah', 'tempat_lahir_kk', 'tempat_lahir_ijazah', 'tanggal_lahir_kk', 'tanggal_lahir_ijazah', 'jenis_kelamin_kk', 'jenis_kelamin_ijazah', 'nama_ibu_kk', 'nama_ayah_kk', 'nama_ayah_ijazah'].includes(key)) {
                         console.log(`  ${key}: ${value}`);
                         formEntries[key] = value;
                     }
                 }
                 
-                // Check for required Bagian A fields
-                const requiredBagianA = ['nik_kk', 'nama_kk', 'nama_ijazah', 'tempat_lahir_kk', 'tempat_lahir_ijazah'];
-                const missingBagianA = requiredBagianA.filter(f => !formEntries[f]);
-                if (missingBagianA.length > 0) {
-                    console.warn('⚠️  Missing Bagian A fields:', missingBagianA);
+                // Check for required Bagian B fields only
+                const requiredBagianB = ['nama_sd', 'tahun_ajaran_kelulusan', 'dokumen_ijazah'];
+                const missingBagianB = requiredBagianB.filter(f => !formEntries[f]);
+                if (missingBagianB.length > 0) {
+                    console.warn('⚠️  Missing Bagian B fields:', missingBagianB);
                 }
                 
                 try {
-                    const response = await fetch('/api/save-verval-complete.php', {
+                    // NEW: Hanya save Bagian B (jenjang sebelumnya + upload)
+                    const response = await fetch('/api/save-bagian-b.php', {
                         method: 'POST',
                         body: formData
                     });
@@ -679,16 +672,8 @@
                     const result = await response.json();
 
                     if (result.success) {
-                        console.log('✅ Verval saved:', result.saved_data);
-                        console.log('📊 Summary:');
-                        console.log(`  - Edited fields: ${result.saved_data.edited_fields}`);
-                        console.log(`  - History items: ${result.saved_data.history_items}`);
-                        console.log(`  - Verified flags: ${result.saved_data.verified_count}`);
-                        console.log(`  - Document uploaded: ${result.saved_data.dokumen_uploaded}`);
-                        if (result.saved_data.debug) {
-                            console.log('🔧 Debug Info:', result.saved_data.debug);
-                        }
-                        showAlert('Data verval berhasil disimpan lengkap ✓', 'success');
+                        console.log('✅ Bagian B saved:', result);
+                        showAlert(result.message, 'success');
                         setTimeout(() => {
                             location.reload();
                         }, 2000);
