@@ -171,6 +171,9 @@ try {
             $record[$h] = isset($row[$col_index]) ? trim((string)$row[$col_index]) : '';
         }
 
+        $record['tanggal_lahir_kk'] = normalizeDate($record['tanggal_lahir_kk']);
+        $record['tanggal_lahir_ijazah'] = normalizeDate($record['tanggal_lahir_ijazah']);
+
         $all_empty = true;
         foreach ($record as $val) {
             if ($val !== '') {
@@ -341,5 +344,40 @@ function getColumnIndex($cell_ref) {
         $col = $col * 26 + (ord($letters[$i]) - 64);
     }
     return $col;
+}
+
+function normalizeDate($value) {
+    $value = trim((string)$value);
+    if ($value === '') {
+        return '';
+    }
+
+    // Excel serial date number
+    if (is_numeric($value)) {
+        $serial = (int)floor((float)$value);
+        if ($serial > 0) {
+            $base = strtotime('1899-12-30');
+            $timestamp = $base + ($serial * 86400);
+            return date('Y-m-d', $timestamp);
+        }
+    }
+
+    // dd/mm/yyyy or dd-mm-yyyy
+    if (preg_match('/^(\d{1,2})[\/\-](\d{1,2})[\/\-](\d{4})$/', $value, $m)) {
+        $day = str_pad($m[1], 2, '0', STR_PAD_LEFT);
+        $month = str_pad($m[2], 2, '0', STR_PAD_LEFT);
+        $year = $m[3];
+        return $year . '-' . $month . '-' . $day;
+    }
+
+    // yyyy/mm/dd or yyyy-mm-dd
+    if (preg_match('/^(\d{4})[\/\-](\d{1,2})[\/\-](\d{1,2})$/', $value, $m)) {
+        $year = $m[1];
+        $month = str_pad($m[2], 2, '0', STR_PAD_LEFT);
+        $day = str_pad($m[3], 2, '0', STR_PAD_LEFT);
+        return $year . '-' . $month . '-' . $day;
+    }
+
+    return $value;
 }
 ?>
