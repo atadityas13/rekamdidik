@@ -709,73 +709,63 @@
                             <h4><b>*Wajib upload hasil scan Ijazah Asli</b></h4>
                             
                             <!-- Panduan Upload Ijazah dengan Contoh dari Gambar Asli -->
-                            <div style="background: #f5f5f5; padding: 15px; border-radius: 8px; margin-bottom: 15px; border-left: 4px solid #667eea;">
-                                <h5 style="margin-top: 0; color: #333; font-size: 14px;">📋 Panduan Upload Ijazah</h5>
+                            <div style="background: #f5f5f5; padding: 10px; border-radius: 6px; margin-bottom: 15px; border: 2px solid #667eea;">
+                                <h5 style="margin: 0 0 10px 0; color: #333; font-size: 13px;">📋 Panduan Upload Ijazah</h5>
                                 
                                 <!-- Contoh BENAR -->
-                                <div style="background: white; padding: 12px; border-radius: 6px; border: 2px solid #4caf50; margin-bottom: 15px;">
-                                    <div style="color: #4caf50; font-weight: 600; font-size: 12px; margin-bottom: 10px;">✓ CONTOH BENAR - Upload Seperti Ini</div>
-                                    <img src="/assets/images/contohijazah.jpg" alt="Contoh Ijazah Benar" style="max-width: 100%; height: auto; border-radius: 4px; border: 1px solid #ddd; margin-bottom: 10px;">
-                                    <ul style="margin: 0; padding-left: 20px; font-size: 11px; color: #555; line-height: 1.6; background: #f1f8e9; padding: 8px 12px; border-radius: 4px;">
-                                        <li>✓ Bagian depan ijazah saja</li>
-                                        <li>✓ Gambar jelas dan terang</li>
-                                        <li>✓ Semua teks terbaca</li>
-                                        <li>✓ Posisi lurus dan proporsional</li>
+                                <div style="background: white; padding: 8px; border-radius: 4px; border: 2px solid #4caf50; margin-bottom: 10px;">
+                                    <div style="color: #4caf50; font-weight: 600; font-size: 11px; margin-bottom: 6px;">✓ CONTOH BENAR</div>
+                                    <img src="/assets/images/contohijazah.jpg" alt="Contoh Ijazah Benar" style="max-width: 280px; height: auto; border-radius: 3px; border: 1px solid #ddd; margin-bottom: 6px; display: block;">
+                                    <ul style="margin: 0; padding-left: 18px; font-size: 10px; color: #555; line-height: 1.4; background: #f1f8e9; padding: 6px 8px; border-radius: 3px; margin: 0;">
+                                        <li>✓ Bagian depan saja</li>
+                                        <li>✓ Jelas dan terang</li>
+                                        <li>✓ Teks terbaca</li>
+                                        <li>✓ Posisi lurus</li>
                                     </ul>
                                 </div>
                                 
                                 <!-- Contoh SALAH -->
-                                <div style="background: white; padding: 12px; border-radius: 6px; border: 2px solid #f44336;">
-                                    <div style="color: #f44336; font-weight: 600; font-size: 12px; margin-bottom: 10px;">✗ JANGAN - Kondisi Ini Akan Ditolak</div>
+                                <div style="background: white; padding: 8px; border-radius: 4px; border: 2px solid #f44336;">
+                                    <div style="color: #f44336; font-weight: 600; font-size: 11px; margin-bottom: 6px;">✗ JANGAN - Kondisi Ditolak</div>
                                     
-                                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 12px;">
+                                    <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 6px; margin-bottom: 6px;">
                                         <!-- Buram -->
                                         <div>
-                                            <small style="color: #d32f2f; font-weight: 600;">Buram/Blur</small>
-                                            <img src="/assets/images/contohijazah.jpg" alt="Buram" style="width: 100%; height: auto; border-radius: 4px; border: 1px solid #ddd; filter: blur(4px);">
+                                            <small style="color: #d32f2f; font-weight: 600; font-size: 9px; display: block; margin-bottom: 3px;">Buram</small>
+                                            <img src="/assets/images/contohijazah.jpg" alt="Buram" style="width: 100%; height: auto; border-radius: 3px; border: 1px solid #ddd; filter: blur(4px);">
                                         </div>
                                         <!-- Gelap -->
                                         <div>
-                                            <small style="color: #d32f2f; font-weight: 600;">Gelap (Brightness Rendah)</small>
-                                            <img src="/assets/images/contohijazah.jpg" alt="Gelap" style="width: 100%; height: auto; border-radius: 4px; border: 1px solid #ddd; filter: brightness(0.4);">
+                                            <small style="color: #d32f2f; font-weight: 600; font-size: 9px; display: block; margin-bottom: 3px;">Gelap</small>
+                                            <img src="/assets/images/contohijazah.jpg" alt="Gelap" style="width: 100%; height: auto; border-radius: 3px; border: 1px solid #ddd; filter: brightness(0.4);">
+                                        </div>
+                                        <!-- Miring -->
+                                        <div>
+                                            <small style="color: #d32f2f; font-weight: 600; font-size: 9px; display: block; margin-bottom: 3px;">Miring</small>
+                                            <img src="/assets/images/contohijazah.jpg" alt="Miring" style="width: 100%; height: auto; border-radius: 3px; border: 1px solid #ddd; transform: rotate(-15deg);">
                                         </div>
                                     </div>
                                     
-                                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 12px;">
-                                        <!-- Miring -->
-                                        <div>
-                                            <small style="color: #d32f2f; font-weight: 600;">Miring/Terbalik</small>
-                                            <img src="/assets/images/contohijazah.jpg" alt="Miring" style="width: 100%; height: auto; border-radius: 4px; border: 1px solid #ddd; transform: rotate(-15deg);">
-                                        </div>
+                                    <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 6px;">
                                         <!-- Terpotong -->
                                         <div>
-                                            <small style="color: #d32f2f; font-weight: 600;">Terpotong (Crop)</small>
-                                            <div style="width: 100%; height: 200px; border-radius: 4px; border: 1px solid #ddd; overflow: hidden;">
+                                            <small style="color: #d32f2f; font-weight: 600; font-size: 9px; display: block; margin-bottom: 3px;">Terpotong</small>
+                                            <div style="width: 100%; height: 140px; border-radius: 3px; border: 1px solid #ddd; overflow: hidden;">
                                                 <img src="/assets/images/contohijazah.jpg" alt="Terpotong" style="width: 100%; height: 100%; object-fit: cover; object-position: center top;">
                                             </div>
                                         </div>
-                                    </div>
-                                    
-                                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px;">
-                                        <!-- Terlalu Dekat (Zoom In) -->
+                                        <!-- Zoom In -->
                                         <div>
-                                            <small style="color: #d32f2f; font-weight: 600;">Terlalu Dekat/Zoom</small>
-                                            <div style="width: 100%; height: 200px; border-radius: 4px; border: 1px solid #ddd; overflow: hidden;">
-                                                <img src="/assets/images/contohijazah.jpg" alt="Dekat" style="width: 150%; height: 150%; object-fit: cover; object-position: center;">
+                                            <small style="color: #d32f2f; font-weight: 600; font-size: 9px; display: block; margin-bottom: 3px;">Terlalu Dekat</small>
+                                            <div style="width: 100%; height: 140px; border-radius: 3px; border: 1px solid #ddd; overflow: hidden;">
+                                                <img src="/assets/images/contohijazah.jpg" alt="Dekat" style="width: 130%; height: 130%; object-fit: cover; object-position: center;">
                                             </div>
                                         </div>
-                                        <!-- Grayscale (Hitam Putih) -->
+                                        <!-- B&W -->
                                         <div>
-                                            <small style="color: #d32f2f; font-weight: 600;">B&W / Scan Buruk</small>
-                                            <img src="/assets/images/contohijazah.jpg" alt="BW" style="width: 100%; height: auto; border-radius: 4px; border: 1px solid #ddd; filter: grayscale(100%) contrast(1.5);">
+                                            <small style="color: #d32f2f; font-weight: 600; font-size: 9px; display: block; margin-bottom: 3px;">B&W / Buruk</small>
+                                            <img src="/assets/images/contohijazah.jpg" alt="BW" style="width: 100%; height: auto; border-radius: 3px; border: 1px solid #ddd; filter: grayscale(100%) contrast(1.5);">
                                         </div>
-                                    </div>
-                                </div>
-                                
-                                <!-- Ringkasan Kriteria -->
-                                <div style="background: #fafafa; padding: 12px; border-radius: 6px; margin-top: 15px; border-left: 3px solid #667eea;" >
-                                    <div style="font-size: 11px; color: #666; line-height: 1.7;">
-                                        <strong style="color: #333;">📌 Catatan Penting:</strong> Upload hanya gambar dalam kondisi NORMAL seperti contoh benar. Jika kondisi berbeda dari syarat, upload akan ditolak dan diminta upload ulang.
                                     </div>
                                 </div>
                             </div>
