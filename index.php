@@ -54,6 +54,7 @@
     </div>
 
     <script src="assets/js/utils.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <script>
         document.getElementById('nisnForm').addEventListener('submit', async function(e) {
             e.preventDefault();
@@ -99,6 +100,8 @@
             const statusMessage = siswa.verval_status === 'sudah' 
                 ? 'Data Anda telah berhasil diverifikasi sesuai dengan dokumen pendukung.' 
                 : 'Data Anda belum diverifikasi. Silakan lengkapi data dan upload dokumen pendukung di bawah.';
+            const disableAttr = (verified) => verified ? 'disabled' : '';
+            const checkedAttr = (verified) => verified ? 'checked' : '';
 
             let html = `
                 <div class="alert alert-info">
@@ -111,140 +114,145 @@
 
                 <div class="data-section">
                     <h3>📋 Bagian A: Data Siswa</h3>
-                    
-                    <div style="margin-bottom: 30px;">
-                        <h4 style="color: #667eea; margin-bottom: 15px; font-size: 14px;">Data dari Kartu Keluarga (KK)</h4>
-                        <div class="data-row">
-                            <div class="data-field">
-                                <label>NIK (KK)</label>
-                                <input type="text" id="nik_kk" value="${siswa.nik_kk || ''}" class="data-input" data-field="nik_kk" ${siswa.nik_kk_verified ? 'disabled' : ''}>
-                                <div class="checkbox-group" style="margin-top: 10px;">
-                                    <input type="checkbox" id="nik_kk_verified" ${siswa.nik_kk_verified ? 'checked' : ''} disabled>
-                                    <label for="nik_kk_verified">Sesuai KK</label>
-                                </div>
-                            </div>
-
-                            <div class="data-field">
-                                <label>Nama (KK)</label>
-                                <input type="text" id="nama_kk" value="${siswa.nama_kk || ''}" class="data-input" data-field="nama_kk" ${siswa.nama_kk_verified ? 'disabled' : ''}>
-                                <div class="checkbox-group" style="margin-top: 10px;">
-                                    <input type="checkbox" id="nama_kk_verified" ${siswa.nama_kk_verified ? 'checked' : ''} disabled>
-                                    <label for="nama_kk_verified">Sesuai KK</label>
-                                </div>
-                            </div>
-
-                            <div class="data-field">
-                                <label>Tempat Lahir (KK)</label>
-                                <input type="text" id="tempat_lahir_kk" value="${siswa.tempat_lahir_kk || ''}" class="data-input" data-field="tempat_lahir_kk" ${siswa.tempat_lahir_kk_verified ? 'disabled' : ''}>
-                                <div class="checkbox-group" style="margin-top: 10px;">
-                                    <input type="checkbox" id="tempat_lahir_kk_verified" ${siswa.tempat_lahir_kk_verified ? 'checked' : ''} disabled>
-                                    <label for="tempat_lahir_kk_verified">Sesuai KK</label>
-                                </div>
-                            </div>
-
-                            <div class="data-field">
-                                <label>Tanggal Lahir (KK)</label>
-                                <input type="date" id="tanggal_lahir_kk" value="${siswa.tanggal_lahir_kk || ''}" class="data-input" data-field="tanggal_lahir_kk" ${siswa.tanggal_lahir_kk_verified ? 'disabled' : ''}>
-                                <div class="checkbox-group" style="margin-top: 10px;">
-                                    <input type="checkbox" id="tanggal_lahir_kk_verified" ${siswa.tanggal_lahir_kk_verified ? 'checked' : ''} disabled>
-                                    <label for="tanggal_lahir_kk_verified">Sesuai KK</label>
-                                </div>
-                            </div>
-
-                            <div class="data-field">
-                                <label>Jenis Kelamin (KK)</label>
-                                <select id="jenis_kelamin_kk" class="data-input" data-field="jenis_kelamin_kk" ${siswa.jenis_kelamin_kk_verified ? 'disabled' : ''}>
-                                    <option value="">-- Pilih --</option>
-                                    <option value="L" ${siswa.jenis_kelamin_kk === 'L' ? 'selected' : ''}>Laki-laki</option>
-                                    <option value="P" ${siswa.jenis_kelamin_kk === 'P' ? 'selected' : ''}>Perempuan</option>
-                                </select>
-                                <div class="checkbox-group" style="margin-top: 10px;">
-                                    <input type="checkbox" id="jenis_kelamin_kk_verified" ${siswa.jenis_kelamin_kk_verified ? 'checked' : ''} disabled>
-                                    <label for="jenis_kelamin_kk_verified">Sesuai KK</label>
-                                </div>
-                            </div>
-
-                            <div class="data-field">
-                                <label>Nama Ibu Kandung (KK)</label>
-                                <input type="text" id="nama_ibu_kk" value="${siswa.nama_ibu_kk || ''}" class="data-input" data-field="nama_ibu_kk" ${siswa.nama_ibu_kk_verified ? 'disabled' : ''}>
-                                <div class="checkbox-group" style="margin-top: 10px;">
-                                    <input type="checkbox" id="nama_ibu_kk_verified" ${siswa.nama_ibu_kk_verified ? 'checked' : ''} disabled>
-                                    <label for="nama_ibu_kk_verified">Sesuai KK</label>
-                                </div>
-                            </div>
-
-                            <div class="data-field">
-                                <label>Nama Ayah Kandung (KK)</label>
-                                <input type="text" id="nama_ayah_kk" value="${siswa.nama_ayah_kk || ''}" class="data-input" data-field="nama_ayah_kk" ${siswa.nama_ayah_kk_verified ? 'disabled' : ''}>
-                                <div class="checkbox-group" style="margin-top: 10px;">
-                                    <input type="checkbox" id="nama_ayah_kk_verified" ${siswa.nama_ayah_kk_verified ? 'checked' : ''} disabled>
-                                    <label for="nama_ayah_kk_verified">Sesuai KK</label>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-
-                    <div>
-                        <h4 style="color: #667eea; margin-bottom: 15px; font-size: 14px;">Data dari Ijazah</h4>
-                        <div class="data-row">
-                            <div class="data-field">
-                                <label>NISN (Ijazah)</label>
-                                <input type="text" value="${siswa.nisn}" disabled>
-                                <div class="checkbox-group" style="margin-top: 10px;">
-                                    <input type="checkbox" ${siswa.nisn_verified ? 'checked' : ''} disabled>
-                                    <label>Sesuai Ijazah</label>
-                                </div>
-                            </div>
-
-                            <div class="data-field">
-                                <label>Nama (Ijazah)</label>
-                                <input type="text" id="nama_ijazah" value="${siswa.nama_ijazah || ''}" class="data-input" data-field="nama_ijazah" ${siswa.nama_ijazah_verified ? 'disabled' : ''}>
-                                <div class="checkbox-group" style="margin-top: 10px;">
-                                    <input type="checkbox" id="nama_ijazah_verified" ${siswa.nama_ijazah_verified ? 'checked' : ''} disabled>
-                                    <label for="nama_ijazah_verified">Sesuai Ijazah</label>
-                                </div>
-                            </div>
-
-                            <div class="data-field">
-                                <label>Tempat Lahir (Ijazah)</label>
-                                <input type="text" id="tempat_lahir_ijazah" value="${siswa.tempat_lahir_ijazah || ''}" class="data-input" data-field="tempat_lahir_ijazah" ${siswa.tempat_lahir_ijazah_verified ? 'disabled' : ''}>
-                                <div class="checkbox-group" style="margin-top: 10px;">
-                                    <input type="checkbox" id="tempat_lahir_ijazah_verified" ${siswa.tempat_lahir_ijazah_verified ? 'checked' : ''} disabled>
-                                    <label for="tempat_lahir_ijazah_verified">Sesuai Ijazah</label>
-                                </div>
-                            </div>
-
-                            <div class="data-field">
-                                <label>Tanggal Lahir (Ijazah)</label>
-                                <input type="date" id="tanggal_lahir_ijazah" value="${siswa.tanggal_lahir_ijazah || ''}" class="data-input" data-field="tanggal_lahir_ijazah" ${siswa.tanggal_lahir_ijazah_verified ? 'disabled' : ''}>
-                                <div class="checkbox-group" style="margin-top: 10px;">
-                                    <input type="checkbox" id="tanggal_lahir_ijazah_verified" ${siswa.tanggal_lahir_ijazah_verified ? 'checked' : ''} disabled>
-                                    <label for="tanggal_lahir_ijazah_verified">Sesuai Ijazah</label>
-                                </div>
-                            </div>
-
-                            <div class="data-field">
-                                <label>Jenis Kelamin (Ijazah)</label>
-                                <select id="jenis_kelamin_ijazah" class="data-input" data-field="jenis_kelamin_ijazah" ${siswa.jenis_kelamin_ijazah_verified ? 'disabled' : ''}>
-                                    <option value="">-- Pilih --</option>
-                                    <option value="L" ${siswa.jenis_kelamin_ijazah === 'L' ? 'selected' : ''}>Laki-laki</option>
-                                    <option value="P" ${siswa.jenis_kelamin_ijazah === 'P' ? 'selected' : ''}>Perempuan</option>
-                                </select>
-                                <div class="checkbox-group" style="margin-top: 10px;">
-                                    <input type="checkbox" id="jenis_kelamin_ijazah_verified" ${siswa.jenis_kelamin_ijazah_verified ? 'checked' : ''} disabled>
-                                    <label for="jenis_kelamin_ijazah_verified">Sesuai Ijazah</label>
-                                </div>
-                            </div>
-
-                            <div class="data-field">
-                                <label>Nama Ayah Kandung (Ijazah)</label>
-                                <input type="text" id="nama_ayah_ijazah" value="${siswa.nama_ayah_ijazah || ''}" class="data-input" data-field="nama_ayah_ijazah" ${siswa.nama_ayah_ijazah_verified ? 'disabled' : ''}>
-                                <div class="checkbox-group" style="margin-top: 10px;">
-                                    <input type="checkbox" id="nama_ayah_ijazah_verified" ${siswa.nama_ayah_ijazah_verified ? 'checked' : ''} disabled>
-                                    <label for="nama_ayah_ijazah_verified">Sesuai Ijazah</label>
-                                </div>
-                            </div>
-                        </div>
+                    <p class="helper-text">Bandingkan data KK dan Ijazah. Jika sudah sesuai, silakan centang agar terkunci.</p>
+                    <div class="compare-wrap">
+                        <table class="compare-table">
+                            <thead>
+                                <tr>
+                                    <th>Field</th>
+                                    <th>Data KK</th>
+                                    <th>Data Ijazah</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td class="compare-label" data-label="Field">NIK</td>
+                                    <td class="compare-cell" data-label="Data KK">
+                                        <input type="text" id="nik_kk" value="${siswa.nik_kk || ''}" class="data-input" data-field="nik_kk" ${disableAttr(siswa.nik_kk_verified)}>
+                                        <div class="checkbox-group compact">
+                                            <input type="checkbox" class="verify-checkbox" data-verify-field="nik_kk_verified" data-target-input="nik_kk" ${checkedAttr(siswa.nik_kk_verified)}>
+                                            <label>KK sesuai</label>
+                                        </div>
+                                    </td>
+                                    <td class="compare-cell muted" data-label="Data Ijazah">-</td>
+                                </tr>
+                                <tr>
+                                    <td class="compare-label" data-label="Field">NISN</td>
+                                    <td class="compare-cell muted" data-label="Data KK">-</td>
+                                    <td class="compare-cell" data-label="Data Ijazah">
+                                        <input type="text" id="nisn_ijazah" value="${siswa.nisn}" disabled>
+                                        <div class="checkbox-group compact">
+                                            <input type="checkbox" class="verify-checkbox" data-verify-field="nisn_verified" data-target-input="nisn_ijazah" ${checkedAttr(siswa.nisn_verified)}>
+                                            <label>Ijazah sesuai</label>
+                                        </div>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td class="compare-label" data-label="Field">Nama</td>
+                                    <td class="compare-cell" data-label="Data KK">
+                                        <input type="text" id="nama_kk" value="${siswa.nama_kk || ''}" class="data-input" data-field="nama_kk" ${disableAttr(siswa.nama_kk_verified)}>
+                                        <div class="checkbox-group compact">
+                                            <input type="checkbox" class="verify-checkbox" data-verify-field="nama_kk_verified" data-target-input="nama_kk" ${checkedAttr(siswa.nama_kk_verified)}>
+                                            <label>KK sesuai</label>
+                                        </div>
+                                    </td>
+                                    <td class="compare-cell" data-label="Data Ijazah">
+                                        <input type="text" id="nama_ijazah" value="${siswa.nama_ijazah || ''}" class="data-input" data-field="nama_ijazah" ${disableAttr(siswa.nama_ijazah_verified)}>
+                                        <div class="checkbox-group compact">
+                                            <input type="checkbox" class="verify-checkbox" data-verify-field="nama_ijazah_verified" data-target-input="nama_ijazah" ${checkedAttr(siswa.nama_ijazah_verified)}>
+                                            <label>Ijazah sesuai</label>
+                                        </div>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td class="compare-label" data-label="Field">Tempat Lahir</td>
+                                    <td class="compare-cell" data-label="Data KK">
+                                        <input type="text" id="tempat_lahir_kk" value="${siswa.tempat_lahir_kk || ''}" class="data-input" data-field="tempat_lahir_kk" ${disableAttr(siswa.tempat_lahir_kk_verified)}>
+                                        <div class="checkbox-group compact">
+                                            <input type="checkbox" class="verify-checkbox" data-verify-field="tempat_lahir_kk_verified" data-target-input="tempat_lahir_kk" ${checkedAttr(siswa.tempat_lahir_kk_verified)}>
+                                            <label>KK sesuai</label>
+                                        </div>
+                                    </td>
+                                    <td class="compare-cell" data-label="Data Ijazah">
+                                        <input type="text" id="tempat_lahir_ijazah" value="${siswa.tempat_lahir_ijazah || ''}" class="data-input" data-field="tempat_lahir_ijazah" ${disableAttr(siswa.tempat_lahir_ijazah_verified)}>
+                                        <div class="checkbox-group compact">
+                                            <input type="checkbox" class="verify-checkbox" data-verify-field="tempat_lahir_ijazah_verified" data-target-input="tempat_lahir_ijazah" ${checkedAttr(siswa.tempat_lahir_ijazah_verified)}>
+                                            <label>Ijazah sesuai</label>
+                                        </div>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td class="compare-label" data-label="Field">Tanggal Lahir</td>
+                                    <td class="compare-cell" data-label="Data KK">
+                                        <input type="date" id="tanggal_lahir_kk" value="${siswa.tanggal_lahir_kk || ''}" class="data-input" data-field="tanggal_lahir_kk" ${disableAttr(siswa.tanggal_lahir_kk_verified)}>
+                                        <div class="checkbox-group compact">
+                                            <input type="checkbox" class="verify-checkbox" data-verify-field="tanggal_lahir_kk_verified" data-target-input="tanggal_lahir_kk" ${checkedAttr(siswa.tanggal_lahir_kk_verified)}>
+                                            <label>KK sesuai</label>
+                                        </div>
+                                    </td>
+                                    <td class="compare-cell" data-label="Data Ijazah">
+                                        <input type="date" id="tanggal_lahir_ijazah" value="${siswa.tanggal_lahir_ijazah || ''}" class="data-input" data-field="tanggal_lahir_ijazah" ${disableAttr(siswa.tanggal_lahir_ijazah_verified)}>
+                                        <div class="checkbox-group compact">
+                                            <input type="checkbox" class="verify-checkbox" data-verify-field="tanggal_lahir_ijazah_verified" data-target-input="tanggal_lahir_ijazah" ${checkedAttr(siswa.tanggal_lahir_ijazah_verified)}>
+                                            <label>Ijazah sesuai</label>
+                                        </div>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td class="compare-label" data-label="Field">Jenis Kelamin</td>
+                                    <td class="compare-cell" data-label="Data KK">
+                                        <select id="jenis_kelamin_kk" class="data-input" data-field="jenis_kelamin_kk" ${disableAttr(siswa.jenis_kelamin_kk_verified)}>
+                                            <option value="">-- Pilih --</option>
+                                            <option value="L" ${siswa.jenis_kelamin_kk === 'L' ? 'selected' : ''}>Laki-laki</option>
+                                            <option value="P" ${siswa.jenis_kelamin_kk === 'P' ? 'selected' : ''}>Perempuan</option>
+                                        </select>
+                                        <div class="checkbox-group compact">
+                                            <input type="checkbox" class="verify-checkbox" data-verify-field="jenis_kelamin_kk_verified" data-target-input="jenis_kelamin_kk" ${checkedAttr(siswa.jenis_kelamin_kk_verified)}>
+                                            <label>KK sesuai</label>
+                                        </div>
+                                    </td>
+                                    <td class="compare-cell" data-label="Data Ijazah">
+                                        <select id="jenis_kelamin_ijazah" class="data-input" data-field="jenis_kelamin_ijazah" ${disableAttr(siswa.jenis_kelamin_ijazah_verified)}>
+                                            <option value="">-- Pilih --</option>
+                                            <option value="L" ${siswa.jenis_kelamin_ijazah === 'L' ? 'selected' : ''}>Laki-laki</option>
+                                            <option value="P" ${siswa.jenis_kelamin_ijazah === 'P' ? 'selected' : ''}>Perempuan</option>
+                                        </select>
+                                        <div class="checkbox-group compact">
+                                            <input type="checkbox" class="verify-checkbox" data-verify-field="jenis_kelamin_ijazah_verified" data-target-input="jenis_kelamin_ijazah" ${checkedAttr(siswa.jenis_kelamin_ijazah_verified)}>
+                                            <label>Ijazah sesuai</label>
+                                        </div>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td class="compare-label" data-label="Field">Nama Ibu Kandung</td>
+                                    <td class="compare-cell" data-label="Data KK">
+                                        <input type="text" id="nama_ibu_kk" value="${siswa.nama_ibu_kk || ''}" class="data-input" data-field="nama_ibu_kk" ${disableAttr(siswa.nama_ibu_kk_verified)}>
+                                        <div class="checkbox-group compact">
+                                            <input type="checkbox" class="verify-checkbox" data-verify-field="nama_ibu_kk_verified" data-target-input="nama_ibu_kk" ${checkedAttr(siswa.nama_ibu_kk_verified)}>
+                                            <label>KK sesuai</label>
+                                        </div>
+                                    </td>
+                                    <td class="compare-cell muted" data-label="Data Ijazah">-</td>
+                                </tr>
+                                <tr>
+                                    <td class="compare-label" data-label="Field">Nama Ayah Kandung</td>
+                                    <td class="compare-cell" data-label="Data KK">
+                                        <input type="text" id="nama_ayah_kk" value="${siswa.nama_ayah_kk || ''}" class="data-input" data-field="nama_ayah_kk" ${disableAttr(siswa.nama_ayah_kk_verified)}>
+                                        <div class="checkbox-group compact">
+                                            <input type="checkbox" class="verify-checkbox" data-verify-field="nama_ayah_kk_verified" data-target-input="nama_ayah_kk" ${checkedAttr(siswa.nama_ayah_kk_verified)}>
+                                            <label>KK sesuai</label>
+                                        </div>
+                                    </td>
+                                    <td class="compare-cell" data-label="Data Ijazah">
+                                        <input type="text" id="nama_ayah_ijazah" value="${siswa.nama_ayah_ijazah || ''}" class="data-input" data-field="nama_ayah_ijazah" ${disableAttr(siswa.nama_ayah_ijazah_verified)}>
+                                        <div class="checkbox-group compact">
+                                            <input type="checkbox" class="verify-checkbox" data-verify-field="nama_ayah_ijazah_verified" data-target-input="nama_ayah_ijazah" ${checkedAttr(siswa.nama_ayah_ijazah_verified)}>
+                                            <label>Ijazah sesuai</label>
+                                        </div>
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
                     </div>
                 </div>
 
@@ -372,9 +380,126 @@
                 });
             });
 
+            document.querySelectorAll('.verify-checkbox').forEach(checkbox => {
+                checkbox.addEventListener('change', async function() {
+                    const fieldName = this.getAttribute('data-verify-field');
+                    const targetInputId = this.getAttribute('data-target-input');
+
+                    const labels = {
+                        nik_kk_verified: 'NIK',
+                        nisn_verified: 'NISN',
+                        nama_kk_verified: 'Nama',
+                        nama_ijazah_verified: 'Nama',
+                        tempat_lahir_kk_verified: 'Tempat Lahir',
+                        tempat_lahir_ijazah_verified: 'Tempat Lahir',
+                        tanggal_lahir_kk_verified: 'Tanggal Lahir',
+                        tanggal_lahir_ijazah_verified: 'Tanggal Lahir',
+                        jenis_kelamin_kk_verified: 'Jenis Kelamin',
+                        jenis_kelamin_ijazah_verified: 'Jenis Kelamin',
+                        nama_ibu_kk_verified: 'Nama Ibu Kandung',
+                        nama_ayah_kk_verified: 'Nama Ayah Kandung',
+                        nama_ayah_ijazah_verified: 'Nama Ayah Kandung'
+                    };
+
+                    const docLabel = fieldName.indexOf('_kk_') !== -1 || fieldName.endsWith('_kk_verified')
+                        ? 'KK'
+                        : 'Ijazah';
+
+                    let valueText = '';
+                    if (targetInputId) {
+                        const target = document.getElementById(targetInputId);
+                        if (target) {
+                            if (target.tagName === 'SELECT') {
+                                valueText = target.options[target.selectedIndex] ? target.options[target.selectedIndex].text : '';
+                            } else {
+                                valueText = target.value;
+                            }
+                        }
+                    }
+
+                    const labelText = labels[fieldName] || 'Data';
+                    const isChecking = this.checked;
+                    const valueSuffix = valueText ? ` "${valueText}"` : '';
+                    const confirmText = isChecking
+                        ? `Anda yakin data ${labelText}${valueSuffix} sudah sesuai dengan data sebenarnya pada ${docLabel}?`
+                        : `Apakah anda yakin membatalkan hasil periksa ${labelText}${valueSuffix} pada ${docLabel}?`;
+
+                    let confirmed = false;
+                    if (typeof Swal !== 'undefined') {
+                        const result = await Swal.fire({
+                            title: isChecking ? 'Konfirmasi Verifikasi' : 'Konfirmasi Pembatalan',
+                            text: confirmText,
+                            icon: 'question',
+                            showCancelButton: true,
+                            confirmButtonText: isChecking ? 'Ya, sesuai' : 'Ya, batalkan',
+                            cancelButtonText: 'Batal'
+                        });
+                        confirmed = result.isConfirmed;
+                    } else {
+                        confirmed = window.confirm(confirmText);
+                    }
+
+                    if (!confirmed) {
+                        this.checked = !isChecking;
+                        return;
+                    }
+
+                    try {
+                        const response = await apiCall('/api/update-verified.php', 'POST', {
+                            siswa_id: siswaId,
+                            field_name: fieldName,
+                            value: isChecking ? 1 : 0
+                        });
+
+                        if (response.success) {
+                            if (targetInputId) {
+                                const target = document.getElementById(targetInputId);
+                                if (target) {
+                                    target.disabled = isChecking;
+                                }
+                            }
+                            showAlert(response.message, 'success');
+                        } else {
+                            this.checked = !isChecking;
+                            showAlert(response.message, 'error');
+                        }
+                    } catch (error) {
+                        this.checked = !isChecking;
+                        showAlert('Terjadi kesalahan: ' + error.message, 'error');
+                    }
+                });
+            });
+
             // Handle verval form submission
             document.getElementById('vervalForm').addEventListener('submit', async function(e) {
                 e.preventDefault();
+
+                let allowSubmit = false;
+                if (typeof Swal !== 'undefined') {
+                    const result = await Swal.fire({
+                        title: 'Konfirmasi Verval',
+                        html: 'Saya menyatakan bahwa semua data telah diperiksa dengan sungguh-sungguh dan perbaikan telah sesuai dengan data sebenarnya. Saya bertanggung jawab atas semua data yang diverifikasi.',
+                        input: 'checkbox',
+                        inputValue: 0,
+                        inputPlaceholder: 'Saya setuju dan bertanggung jawab',
+                        showCancelButton: true,
+                        confirmButtonText: 'Ya, simpan',
+                        cancelButtonText: 'Batal',
+                        preConfirm: (value) => {
+                            if (!value) {
+                                Swal.showValidationMessage('Anda harus menyetujui pernyataan ini');
+                            }
+                            return value;
+                        }
+                    });
+                    allowSubmit = result.isConfirmed && result.value;
+                } else {
+                    allowSubmit = window.confirm('Saya menyatakan bahwa semua data telah diperiksa dengan sungguh-sungguh dan perbaikan telah sesuai dengan data sebenarnya. Saya bertanggung jawab atas semua data yang diverifikasi.');
+                }
+
+                if (!allowSubmit) {
+                    return;
+                }
 
                 const formData = new FormData(this);
                 

@@ -37,13 +37,28 @@ try {
                        'nama_ijazah', 'tempat_lahir_ijazah', 'tanggal_lahir_ijazah',
                        'jenis_kelamin_ijazah', 'nama_ayah_ijazah'];
 
+    $verified_fields = [
+        'nik_kk_verified',
+        'nama_kk_verified',
+        'tempat_lahir_kk_verified',
+        'tanggal_lahir_kk_verified',
+        'jenis_kelamin_kk_verified',
+        'nama_ibu_kk_verified',
+        'nama_ayah_kk_verified',
+        'nama_ijazah_verified',
+        'tempat_lahir_ijazah_verified',
+        'tanggal_lahir_ijazah_verified',
+        'jenis_kelamin_ijazah_verified',
+        'nama_ayah_ijazah_verified'
+    ];
+
     if (!in_array($field_name, $fields_allowed)) {
         throw new Exception('Field tidak valid');
     }
 
     // Check if field is verified
     $verified_field = $field_name . '_verified';
-    if (!in_array($verified_field, $fields_allowed)) {
+    if (!in_array($verified_field, $verified_fields, true)) {
         $verified_field = null;
     }
 
