@@ -62,7 +62,8 @@ try {
                 nama_ibu_kk, nama_ayah_kk,
                 nama_ijazah, tempat_lahir_ijazah, tanggal_lahir_ijazah,
                 jenis_kelamin_ijazah, nama_ayah_ijazah,
-                verval_status, created_at, updated_at
+                verval_status, verval_approval_status, catatan_konfirmasi,
+                created_at, updated_at
               FROM siswa
               WHERE $where_clause
               ORDER BY created_at DESC

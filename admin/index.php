@@ -244,8 +244,45 @@ if (!isset($_SESSION['logged_in']) || $_SESSION['logged_in'] !== true) {
         </div>
     </div>
 
+    <!-- Modal Review Verval -->
+    <div id="reviewVervalModal" class="modal">
+        <div class="modal-content" style="max-width: 1200px;">
+            <div class="modal-header">
+                <h2>✅ Review & Konfirmasi Verval</h2>
+                <button class="close-modal">&times;</button>
+            </div>
+            <div style="padding: 20px;">
+                <!-- Info Siswa -->
+                <div id="reviewSiswaInfo" style="background: #f5f7fa; padding: 15px; border-radius: 8px; margin-bottom: 20px;">
+                    <!-- Will be populated dynamically -->
+                </div>
+
+                <!-- Status Overview -->
+                <div id="reviewStats" style="display: grid; grid-template-columns: repeat(4, 1fr); gap: 15px; margin-bottom: 20px;">
+                    <!-- Will be populated dynamically -->
+                </div>
+
+                <!-- Field Review List -->
+                <div style="background: white; border: 1px solid #ddd; border-radius: 8px; overflow: hidden;">
+                    <div style="background: #667eea; color: white; padding: 12px 20px;">
+                        <h3 style="margin: 0;">Daftar Field untuk Dikonfirmasi</h3>
+                    </div>
+                    <div id="reviewFieldsList" style="max-height: 500px; overflow-y: auto; padding: 15px;">
+                        <!-- Will be populated dynamically -->
+                    </div>
+                </div>
+
+                <!-- Final Action -->
+                <div id="finalActionArea" style="margin-top: 20px; padding: 20px; background: #f8f9fa; border-radius: 8px; text-align: center;">
+                    <!-- Will show when all approved -->
+                </div>
+            </div>
+        </div>
+    </div>
+
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11.0.20/dist/sweetalert2.all.min.js"></script>
     <script src="../assets/js/utils.js"></script>
+    <script src="review-verval.js"></script>
     <script>
         let currentPage = 1;
         let currentSearch = '';
@@ -510,18 +547,39 @@ if (!isset($_SESSION['logged_in']) || $_SESSION['logged_in'] !== true) {
                         let html = '';
                         result.data.forEach((siswa, index) => {
                             const no = (currentPage - 1) * 10 + index + 1;
-                            const statusBadge = siswa.verval_status === 'sudah' 
+                            
+                            // Status verval badge
+                            let statusBadge = siswa.verval_status === 'sudah' 
                                 ? '<span class="status-badge status-sudah">Sudah Verval</span>'
                                 : '<span class="status-badge status-belum">Belum Verval</span>';
+                            
+                            // Approval status badge
+                            if (siswa.verval_status === 'sudah' && siswa.verval_approval_status) {
+                                const approvalBadges = {
+                                    'pending': '<span style="display:block; font-size:10px; color:#ff9800; margin-top:3px;">⏳ Menunggu Review</span>',
+                                    'need_confirmation': '<span style="display:block; font-size:10px; color:#f44336; margin-top:3px;">⚠️ Perlu Konfirmasi</span>',
+                                    'approved': '<span style="display:block; font-size:10px; color:#4caf50; margin-top:3px;">✓ Disetujui</span>'
+                                };
+                                statusBadge += (approvalBadges[siswa.verval_approval_status] || '');
+                            }
                             
                             const nama = siswa.nama_kk || siswa.nama_ijazah || '-';
                             const ijazahLink = siswa.dokumen_ijazah 
                                 ? `<a href="../uploads/ijazah/${siswa.dokumen_ijazah}" target="_blank" style="color: #667eea; margin-right: 10px;">👁 Lihat</a><a href="../uploads/ijazah/${siswa.dokumen_ijazah}" download style="color: #667eea;">⬇️ Download</a>`
                                 : '<span style="color: #999;">-</span>';
 
-                            const batalkanBtn = siswa.verval_status === 'sudah' 
-                                ? `<button class="btn-small btn-danger" onclick="cancelVerval(${siswa.id})" style="font-size: 11px; padding: 5px 8px; background: #d32f2f; color: white;">✕ Batalkan</button>`
-                                : '';
+                            // Build action buttons
+                            let actionButtons = `<button class="btn-small btn-view" onclick="viewDetail(${siswa.id})" style="font-size: 11px; padding: 5px 8px;">👁 Lihat Data</button>`;
+                            
+                            if (siswa.verval_status === 'sudah') {
+                                // Review button (hanya jika belum approved)
+                                if (siswa.verval_approval_status !== 'approved') {
+                                    const reviewClass = siswa.verval_approval_status === 'need_confirmation' ? 'btn-warning' : 'btn-primary';
+                                    actionButtons += `<button class="btn-small ${reviewClass}" onclick="openReviewVerval(${siswa.id})" style="font-size: 11px; padding: 5px 8px;">✓ Review Verval</button>`;
+                                }
+                                // Cancel button
+                                actionButtons += `<button class="btn-small btn-danger" onclick="cancelVerval(${siswa.id})" style="font-size: 11px; padding: 5px 8px; background: #d32f2f; color: white;">✕ Batalkan</button>`;
+                            }
 
                             html += `
                                 <tr>
@@ -533,8 +591,7 @@ if (!isset($_SESSION['logged_in']) || $_SESSION['logged_in'] !== true) {
                                     <td>${ijazahLink}</td>
                                     <td>
                                         <div class="table-actions" style="display: flex; gap: 5px; flex-wrap: wrap;">
-                                            <button class="btn-small btn-view" onclick="viewDetail(${siswa.id})" style="font-size: 11px; padding: 5px 8px;">👁 Lihat Data</button>
-                                            ${batalkanBtn}
+                                            ${actionButtons}
                                         </div>
                                     </td>
                                 </tr>
@@ -1104,6 +1161,277 @@ if (!isset($_SESSION['logged_in']) || $_SESSION['logged_in'] !== true) {
         document.getElementById('filterStatusPengajuan').addEventListener('change', function() {
             loadPengajuanPembatalan();
         });
+
+        // ============================================
+        // REVIEW & KONFIRMASI VERVAL FUNCTIONS
+        // ============================================
+
+        async function openReviewVerval(siswaId) {
+            try {
+                const response = await fetch(`../api/admin/get-verval-review.php?siswa_id=${siswaId}`);
+                const result = await response.json();
+
+                if (result.success) {
+                    const data = result.data;
+                    displayReviewVerval(siswaId, data);
+                    openModal('reviewVervalModal');
+                } else {
+                    showAlert(result.message, 'error');
+                }
+            } catch (error) {
+                showAlert('Terjadi kesalahan: ' + error.message, 'error');
+                console.error('Error loading review:', error);
+            }
+        }
+
+        function displayReviewVerval(siswaId, data) {
+            const siswa = data.siswa;
+            const konfirmasi = data.konfirmasi;
+            const stats = data.stats;
+
+            // Siswa Info
+            document.getElementById('reviewSiswaInfo').innerHTML = `
+                <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 15px;">
+                    <div>
+                        <strong>NISN:</strong> ${siswa.nisn}
+                    </div>
+                    <div>
+                        <strong>Nama:</strong> ${siswa.nama_kk || siswa.nama_ijazah}
+                    </div>
+                    <div>
+                        <strong>Status:</strong> <span class="status-badge status-sudah">Sudah Verval</span>
+                    </div>
+                </div>
+            `;
+
+            // Stats
+            document.getElementById('reviewStats').innerHTML = `
+                <div style="background: #e3f2fd; padding: 15px; border-radius: 6px; text-align: center;">
+                    <div style="font-size: 24px; font-weight: bold; color: #1976d2;">${stats.pending}</div>
+                    <div style="font-size: 12px; color: #666;">⏳ Pending</div>
+                </div>
+                <div style="background: #e8f5e9; padding: 15px; border-radius: 6px; text-align: center;">
+                    <div style="font-size: 24px; font-weight: bold; color: #388e3c;">${stats.approved}</div>
+                    <div style="font-size: 12px; color: #666;">✓ Approved</div>
+                </div>
+                <div style="background: #fff3e0; padding: 15px; border-radius: 6px; text-align: center;">
+                    <div style="font-size: 24px; font-weight: bold; color: #f57c00;">${stats.need_document}</div>
+                    <div style="font-size: 12px; color: #666;">📄 Need Doc</div>
+                </div>
+                <div style="background: #f3e5f5; padding: 15px; border-radius: 6px; text-align: center;">
+                    <div style="font-size: 24px; font-weight: bold; color: #7b1fa2;">${stats.document_uploaded}</div>
+                    <div style="font-size: 12px; color: #666;">📤 Uploaded</div>
+                </div>
+            `;
+
+            // Fields List dengan mapping label
+            const fieldLabels = {
+                'nik_kk': 'NIK pada KK',
+                'nama_kk': 'Nama pada KK',
+                'tempat_lahir_kk': 'Tempat Lahir pada KK',
+                'tanggal_lahir_kk': 'Tanggal Lahir pada KK',
+                'jenis_kelamin_kk': 'Jenis Kelamin pada KK',
+                'nama_ibu_kk': 'Nama Ibu pada KK',
+                'nama_ayah_kk': 'Nama Ayah pada KK',
+                'nisn': 'NISN',
+                'nama_ijazah': 'Nama pada Ijazah',
+                'tempat_lahir_ijazah': 'Tempat Lahir pada Ijazah',
+                'tanggal_lahir_ijazah': 'Tanggal Lahir pada Ijazah',
+                'jenis_kelamin_ijazah': 'Jenis Kelamin pada Ijazah',
+                'nama_ayah_ijazah': 'Nama Ayah pada Ijazah',
+                'jenjang_sebelumnya': 'Jenjang Sebelumnya',
+                'nama_sekolah_asal': 'Nama Sekolah Asal',
+                'npsn_sekolah_asal': 'NPSN Sekolah Asal',
+                'nomor_peserta_un': 'Nomor Peserta UN',
+                'nomor_seri_ijazah': 'Nomor Seri Ijazah',
+                'tahun_lulus': 'Tahun Lulus'
+            };
+
+            let fieldsHTML = '';
+            let allApproved = true;
+            
+            for (const [field, status] of Object.entries(konfirmasi)) {
+                const fieldLabel = fieldLabels[field] || field;
+                const fieldValue = siswa[field] || '-';
+                const statusData = status;
+                
+                if (statusData.status !== 'approved') {
+                    allApproved = false;
+                }
+
+                const statusBadges = {
+                    'pending': '<span style="background: #ff9800; color: white; padding: 4px 8px; border-radius: 4px; font-size: 11px;">⏳ Pending</span>',
+                    'approved': '<span style="background: #4caf50; color: white; padding: 4px 8px; border-radius: 4px; font-size: 11px;">✓ Approved</span>',
+                    'need_document': '<span style="background: #f44336; color: white; padding: 4px 8px; border-radius: 4px; font-size: 11px;">📄 Need Doc</span>',
+                    'document_uploaded': '<span style="background: #9c27b0; color: white; padding: 4px 8px; border-radius: 4px; font-size: 11px;">📤 Uploaded</span>'
+                };
+
+                const actionButtons = statusData.status === 'approved' ? '' : `
+                    <div style="margin-top: 10px; display: flex; gap: 5px;">
+                        <button onclick="konfirmasiField(${siswaId}, '${field}', 'approve')" 
+                                class="btn-small btn-primary" 
+                                style="font-size: 11px; padding: 5px 10px; background: #4caf50;">
+                            ✓ Setujui
+                        </button>
+                        <button onclick="konfirmasiField(${siswaId}, '${field}', 'need_document')" 
+                                class="btn-small btn-warning" 
+                                style="font-size: 11px; padding: 5px 10px; background: #ff9800;">
+                            📄 Minta Berkas
+                        </button>
+                    </div>
+                `;
+
+                const berkasInfo = statusData.berkas_pendukung ? `
+                    <div style="margin-top: 5px;">
+                        <a href="../uploads/berkas_pendukung/${statusData.berkas_pendukung}" target="_blank" 
+                           style="color: #667eea; font-size: 11px;">
+                            📎 Lihat Berkas Pendukung
+                        </a>
+                    </div>
+                ` : '';
+
+                const catatan = statusData.catatan_admin ? `
+                    <div style="margin-top: 5px; font-size: 11px; color: #666; font-style: italic;">
+                        Catatan: ${statusData.catatan_admin}
+                    </div>
+                ` : '';
+
+                fieldsHTML += `
+                    <div style="padding:15px; border-bottom: 1px solid #eee;">
+                        <div style="display: flex; justify-content: space-between; align-items: start; margin-bottom: 8px;">
+                            <div>
+                                <strong style="color: #333;">${fieldLabel}</strong>
+                                <div style="color: #666; font-size: 13px; margin-top: 3px;">${fieldValue}</div>
+                                ${berkasInfo}
+                                ${catatan}
+                            </div>
+                            <div>
+                                ${statusBadges[statusData.status]}
+                            </div>
+                        </div>
+                        ${actionButtons}
+                    </div>
+                `;
+            }
+
+            document.getElementById('reviewFieldsList').innerHTML = fieldsHTML;
+
+            // Final Action Area
+            if (allApproved) {
+                document.getElementById('finalActionArea').innerHTML = `
+                    <div style="background: #e8f5e9; padding: 20px; border-radius: 8px; border: 2px solid #4caf50;">
+                        <h3 style="color: #388e3c; margin: 0 0 15px 0;">✅ Semua Field Sudah Disetujui</h3>
+                        <p style="margin: 0 0 15px 0; color: #666;">Silakan berikan persetujuan final untuk menyelesaikan proses verval.</p>
+                        <button onclick="finalApproveVerval(${siswaId})" 
+                                class="button button-success" 
+                                style="background: #4caf50; padding: 12px 30px;">
+                            ✓ Setujui Verval Sepenuhnya
+                        </button>
+                    </div>
+                `;
+            } else {
+                document.getElementById('finalActionArea').innerHTML = `
+                    <div style="color: #666;">
+                        <p style="margin: 0;">Masih ada field yang perlu dikonfirmasi. Silakan review dan konfirmasi semua field terlebih dahulu.</p>
+                    </div>
+                `;
+            }
+        }
+
+        async function konfirmasiField(siswaId, fieldName, action) {
+            const catatan = await Swal.fire({
+                title: action === 'approve' ? 'Setujui Field' : 'Minta Berkas Pendukung',
+                input: 'textarea',
+                inputLabel: 'Catatan (opsional)',
+                inputPlaceholder: 'Masukkan catatan jika diperlukan...',
+                showCancelButton: true,
+                confirmButtonText: action === 'approve' ? 'Setujui' : 'Minta Berkas',
+                cancelButtonText: 'Batal',
+                confirmButtonColor: action === 'approve' ? '#4caf50' : '#ff9800'
+            });
+
+            if (catatan.isConfirmed) {
+                try {
+                    const response = await fetch('../api/admin/konfirmasi-field.php', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json'
+                        },
+                        body: JSON.stringify({
+                            siswa_id: siswaId,
+                            field_name: fieldName,
+                            action: action,
+                            catatan: catatan.value || null
+                        })
+                    });
+
+                    const result = await response.json();
+
+                    if (result.success) {
+                        showAlert(result.message, 'success');
+                        // Reload review
+                        openReviewVerval(siswaId);
+                        // Reload data list
+                        loadData();
+                    } else {
+                        showAlert(result.message, 'error');
+                    }
+                } catch (error) {
+                    showAlert('Terjadi kesalahan: ' + error.message, 'error');
+                    console.error('Error konfirmasi field:', error);
+                }
+            }
+        }
+
+        async function finalApproveVerval(siswaId) {
+            const result = await Swal.fire({
+                title: 'Setujui Verval Sepenuhnya?',
+                text: 'Siswa akan mendapatkan persetujuan final dan verval dianggap selesai.',
+                input: 'textarea',
+                inputLabel: 'Catatan Final (opsional)',
+                inputPlaceholder: 'Masukkan catatan final jika diperlukan...',
+                icon: 'question',
+                showCancelButton: true,
+                confirmButtonText: 'Ya, Setujui',
+                cancelButtonText: 'Batal',
+                confirmButtonColor: '#4caf50',
+                cancelButtonColor: '#6c757d'
+            });
+
+            if (result.isConfirmed) {
+                try {
+                    const response = await fetch('../api/admin/final-approve-verval.php', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json'
+                        },
+                        body: JSON.stringify({
+                            siswa_id: siswaId,
+                            catatan: result.value || null
+                        })
+                    });
+
+                    const data = await response.json();
+
+                    if (data.success) {
+                        Swal.fire({
+                            icon: 'success',
+                            title: 'Berhasil!',
+                            text: data.message,
+                            confirmButtonText: 'OK'
+                        }).then(() => {
+                            closeModal('reviewVervalModal');
+                            loadData();
+                        });
+                    } else {
+                        showAlert(data.message, 'error');
+                    }
+                } catch (error) {
+                    showAlert('Terjadi kesalahan: ' + error.message, 'error');
+                    console.error('Error final approve:', error);
+                }
+            }
+        }
     </script>
 </body>
 </html>

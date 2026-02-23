@@ -463,6 +463,16 @@
                     </div>
                 ` : ''}
 
+                <!-- Section Status Konfirmasi Verval -->
+                <div id="konfirmasiVervalSection" style="margin-top: 30px;">
+                    <!-- Will be loaded dynamically -->
+                </div>
+
+                <!-- Section Re-Upload Ijazah -->
+                <div id="reuploadIjazahSection" style="margin-top: 30px;">
+                    <!-- Will be loaded dynamically -->
+                </div>
+
                 <!-- Section Pengajuan Pembatalan -->
                 <div id="pengajuanPembatalanSection" style="margin-top: 30px;">
                     <!-- Will be loaded dynamically -->
@@ -470,14 +480,19 @@
 
                 <div style="margin-top: 30px; padding: 20px; background: #f5f7fa; border-radius: 8px; text-align: center;">
                     <p style="margin: 0 0 15px 0; color: #666;">Terima kasih telah melakukan verifikasi dan rekam data dengan benar.</p>
+                    <p style="margin: 0 0 15px 0; color: #ff9800; font-weight: 600;">⚠️ Penting: Silakan cek berkala untuk memastikan tidak ada data yang perlu konfirmasi lebih lanjut.</p>
                     <button type="button" onclick="location.reload()" class="btn-secondary">
                         🔄 Cek Lagi
                     </button>
                 </div>
             `;
 
-            // Load status pengajuan pembatalan after rendering
-            setTimeout(() => loadPengajuanPembatalanStatus(siswa.id), 500);
+            // Load status konfirmasi and pengajuan pembatalan after rendering
+            setTimeout(() => {
+                loadKonfirmasiStatus(siswa.id);
+                loadReuploadIjazahStatus(siswa.id);
+                loadPengajuanPembatalanStatus(siswa.id);
+            }, 500);
 
             return html;
         }
@@ -1018,6 +1033,414 @@
                     showAlert('Terjadi kesalahan: ' + error.message, 'error');
                 }
             });
+        }
+
+        // ========================================
+        // KONFIRMASI VERVAL STATUS (Enhanced)
+        // ========================================
+        async function loadKonfirmasiStatus(siswaId) {
+            try {
+                const response = await fetch(`/api/check-konfirmasi-status.php?siswa_id=${siswaId}`);
+                const result = await response.json();
+
+                if (result.success) {
+                    const data = result.data;
+                    const container = document.getElementById('konfirmasiVervalSection');
+                    
+                    // Check approval status
+                    if (data.approval_status === 'approved') {
+                        // Semua sudah disetujui
+                        container.innerHTML = `
+                            <div class="alert alert-success" style="margin-bottom: 20px;">
+                                <div style="display: flex; align-items: center; gap: 15px;">
+                                    <div style="font-size: 36px;">✅</div>
+                                    <div>
+                                        <h3 style="margin: 0 0 5px 0; color: #388e3c;">Verval Telah Disetujui!</h3>
+                                        <p style="margin: 0;">Semua data Anda telah dikonfirmasi dan disetujui oleh admin.</p>
+                                        ${data.catatan_konfirmasi ? `<p style="margin: 5px 0 0 0; font-style: italic;">Catatan: ${data.catatan_konfirmasi}</p>` : ''}
+                                    </div>
+                                </div>
+                            </div>
+                        `;
+                    } else if (data.approval_status === 'need_confirmation') {
+                        // Ada field yang perlu action dari siswa
+                        const fieldsNeedAction = data.fields_need_action || [];
+                        
+                        if (fieldsNeedAction.length > 0) {
+                            let html = `
+                                <div class="alert" style="background: #fff3e0; border-left: 4px solid #ff9800; margin-bottom: 20px;">
+                                    <div style="display: flex; align-items: center; gap: 15px; margin-bottom: 15px;">
+                                        <div style="font-size: 36px;">⚠️</div>
+                                        <div>
+                                            <h3 style="margin: 0 0 5px 0; color: #e65100;">Ada Data yang Perlu Konfirmasi!</h3>
+                                            <p style="margin: 0;">Ada ${fieldsNeedAction.length} data yang memerlukan tindakan dari Anda.</p>
+                                        </div>
+                                    </div>
+
+                                    <div style="background: white; padding: 15px; border-radius: 6px;">
+                            `;
+
+                            fieldsNeedAction.forEach(field => {
+                                const isResponded = field.status === 'student_responded';
+                                const tipe = field.tipe_konfirmasi;
+                                
+                                html += buildFieldConfirmationCard(siswaId, field, isResponded, tipe);
+                            });
+
+                            html += `
+                                    </div>
+                                </div>
+                            `;
+
+                            container.innerHTML = html;
+                        }
+                    } else if (data.approval_status === 'pending') {
+                        // Menunggu review admin
+                        container.innerHTML = `
+                            <div class="alert" style="background: #e3f2fd; border-left: 4px solid #2196f3; margin-bottom: 20px;">
+                                <div style="display: flex; align-items: center; gap: 15px;">
+                                    <div style="font-size: 36px;">⏳</div>
+                                    <div>
+                                        <h3 style="margin: 0 0 5px 0; color: #1976d2;">Menunggu Review Admin</h3>
+                                        <p style="margin: 0;">Data verval Anda sedang dalam proses review oleh admin. Silakan cek kembali secara berkala.</p>
+                                    </div>
+                                </div>
+                            </div>
+                        `;
+                    }
+                }
+            } catch (error) {
+                console.error('Error loading konfirmasi status:', error);
+            }
+        }
+
+        function buildFieldConfirmationCard(siswaId, field, isResponded, tipe) {
+            const formId = `form-${field.field_name}`;
+            
+            // Status badge
+            let statusBadge = '';
+            if (isResponded) {
+                statusBadge = '<span style="background: #9c27b0; color: white; padding: 5px 10px; border-radius: 4px; font-size: 12px;">📤 Terkirim</span>';
+            } else {
+                if (tipe === 'need_document') {
+                    statusBadge = '<span style="background: #f44336; color: white; padding: 5px 10px; border-radius: 4px; font-size: 12px;">📄 Perlu Berkas</span>';
+                } else if (tipe === 'need_confirmation') {
+                    statusBadge = '<span style="background: #ff9800; color: white; padding: 5px 10px; border-radius: 4px; font-size: 12px;">💬 Perlu Konfirmasi</span>';
+                } else if (tipe === 'need_edit') {
+                    statusBadge = '<span style="background: #2196f3; color: white; padding: 5px 10px; border-radius: 4px; font-size: 12px;">✏️ Perlu Edit</span>';
+                }
+            }
+
+            let html = `
+                <div style="padding: 15px; border-bottom: 1px solid #eee; ${isResponded ? 'background: #f5f5f5;' : ''}">
+                    <div style="display: flex; justify-content: space-between; align-items: start; margin-bottom: 10px;">
+                        <div style="flex: 1;">
+                            <strong style="color: #333; display: block; margin-bottom: 5px;">${getFieldLabel(field.field_name)}</strong>
+                            
+                            ${field.catatan_admin ? `
+                                <div style="background: #fff3e0; padding: 10px; border-radius: 4px; margin: 5px 0; font-size: 13px; border-left: 3px solid #ff9800;">
+                                    <strong style="color: #e65100;">📌 Catatan Admin:</strong>
+                                    <p style="margin: 5px 0 0 0; color: #333;">${field.catatan_admin}</p>
+                                </div>
+                            ` : ''}
+
+                            ${isResponded && field.pesan_siswa ? `
+                                <div style="background: #e8f5e9; padding: 10px; border-radius: 4px; margin: 5px 0; font-size: 13px; border-left: 3px solid #4caf50;">
+                                    <strong style="color: #2e7d32;">💬 Pesan Anda:</strong>
+                                    <p style="margin: 5px 0 0 0; color: #333;">${field.pesan_siswa}</p>
+                                </div>
+                            ` : ''}
+
+                            ${isResponded && field.nilai_baru_siswa ? `
+                                <div style="background: #e3f2fd; padding: 10px; border-radius: 4px; margin: 5px 0; font-size: 13px; border-left: 3px solid #2196f3;">
+                                    <strong style="color: #1976d2;">✏️ Nilai Baru:</strong>
+                                    <p style="margin: 5px 0 0 0; color: #333;">${field.nilai_baru_siswa}</p>
+                                </div>
+                            ` : ''}
+
+                            ${field.berkas_pendukung ? `
+                                <div style="margin-top: 8px;">
+                                    <a href="/uploads/berkas_pendukung/${field.berkas_pendukung}" target="_blank" 
+                                       style="color: #4caf50; font-size: 13px; text-decoration: underline;">
+                                        ✓ Berkas telah diupload - Klik untuk melihat
+                                    </a>
+                                </div>
+                            ` : ''}
+                        </div>
+                        <div>
+                            ${statusBadge}
+                        </div>
+                    </div>
+
+                    ${!isResponded ? buildConfirmationForm(siswaId, field, tipe, formId) : ''}
+                </div>
+            `;
+
+            return html;
+        }
+
+        function buildConfirmationForm(siswaId, field, tipe, formId) {
+            const fieldName = field.field_name;
+
+            if (tipe === 'need_document') {
+                // Hanya upload berkas
+                return `
+                    <div style="margin-top: 10px; padding: 15px; background: #fafafa; border-radius: 4px; border: 1px solid #e0e0e0;">
+                        <form id="${formId}" onsubmit="submitKonfirmasiSiswa(event, ${siswaId}, '${fieldName}', 'need_document')" style="display: flex; flex-direction: column; gap: 12px;">
+                            <div>
+                                <label style="display: block; margin-bottom: 5px; font-size: 13px; font-weight: 600;">📄 Upload Berkas Pendukung:</label>
+                                <input type="file" 
+                                       name="berkas" 
+                                       accept=".jpg,.jpeg,.png,.pdf" 
+                                       required
+                                       style="width: 100%; padding: 8px; border: 1px solid #ddd; border-radius: 4px; font-size: 13px;">
+                                <small style="color: #666; display: block; margin-top: 3px;">JPG, PNG, atau PDF (Max 2MB)</small>
+                            </div>
+                            <button type="submit" class="button button-primary" style="align-self: flex-start; padding: 10px 20px;">
+                                📤 Kirim Berkas
+                            </button>
+                        </form>
+                    </div>
+                `;
+            } else if (tipe === 'need_confirmation') {
+                // Hanya pesan konfirmasi (no file)
+                return `
+                    <div style="margin-top: 10px; padding: 15px; background: #fafafa; border-radius: 4px; border: 1px solid #e0e0e0;">
+                        <form id="${formId}" onsubmit="submitKonfirmasiSiswa(event, ${siswaId}, '${fieldName}', 'need_confirmation')" style="display: flex; flex-direction: column; gap: 12px;">
+                            <div>
+                                <label style="display: block; margin-bottom: 5px; font-size: 13px; font-weight: 600;">💬 Pesan Konfirmasi:</label>
+                                <textarea 
+                                    name="pesan" 
+                                    required 
+                                    minlength="10"
+                                    rows="3"
+                                    placeholder="Jelaskan alasan atau konfirmasi data (minimal 10 karakter)"
+                                    style="width: 100%; padding: 8px; border: 1px solid #ddd; border-radius: 4px; font-size: 13px; font-family: inherit; resize: vertical;"></textarea>
+                                <small style="color: #666; display: block; margin-top: 3px;">Minimal 10 karakter</small>
+                            </div>
+                            <button type="submit" class="button button-primary" style="align-self: flex-start; padding: 10px 20px;">
+                                💬 Kirim Konfirmasi
+                            </button>
+                        </form>
+                    </div>
+                `;
+            } else if (tipe === 'need_edit') {
+                // Edit data + pesan + upload berkas
+                return `
+                    <div style="margin-top: 10px; padding: 15px; background: #fafafa; border-radius: 4px; border: 1px solid #e0e0e0;">
+                        <form id="${formId}" onsubmit="submitKonfirmasiSiswa(event, ${siswaId}, '${fieldName}', 'need_edit')" style="display: flex; flex-direction: column; gap: 12px;">
+                            <div>
+                                <label style="display: block; margin-bottom: 5px; font-size: 13px; font-weight: 600;">✏️ Nilai Baru:</label>
+                                <input type="text" 
+                                       name="nilai_baru" 
+                                       required 
+                                       placeholder="Masukkan nilai yang benar"
+                                       style="width: 100%; padding: 8px; border: 1px solid #ddd; border-radius: 4px; font-size: 13px;">
+                            </div>
+                            <div>
+                                <label style="display: block; margin-bottom: 5px; font-size: 13px; font-weight: 600;">💬 Pesan Penjelasan:</label>
+                                <textarea 
+                                    name="pesan" 
+                                    required 
+                                    minlength="10"
+                                    rows="2"
+                                    placeholder="Jelaskan alasan perubahan data (minimal 10 karakter)"
+                                    style="width: 100%; padding: 8px; border: 1px solid #ddd; border-radius: 4px; font-size: 13px; font-family: inherit; resize: vertical;"></textarea>
+                            </div>
+                            <div>
+                                <label style="display: block; margin-bottom: 5px; font-size: 13px; font-weight: 600;">📄 Berkas Pendukung:</label>
+                                <input type="file" 
+                                       name="berkas" 
+                                       accept=".jpg,.jpeg,.png,.pdf" 
+                                       required
+                                       style="width: 100%; padding: 8px; border: 1px solid #ddd; border-radius: 4px; font-size: 13px;">
+                                <small style="color: #666; display: block; margin-top: 3px;">JPG, PNG, atau PDF (Max 2MB)</small>
+                            </div>
+                            <button type="submit" class="button button-primary" style="align-self: flex-start; padding: 10px 20px;">
+                                ✏️ Kirim Perubahan
+                            </button>
+                        </form>
+                    </div>
+                `;
+            }
+
+            return '';
+        }
+
+        async function submitKonfirmasiSiswa(event, siswaId, fieldName, tipe) {
+            event.preventDefault();
+            
+            const form = event.target;
+            const formData = new FormData(form);
+            
+            formData.append('siswa_id', siswaId);
+            formData.append('field_name', fieldName);
+            formData.append('tipe_konfirmasi', tipe);
+
+            // Validasi file size jika ada file
+            const fileInput = form.querySelector('input[type="file"]');
+            if (fileInput && fileInput.files[0]) {
+                const file = fileInput.files[0];
+                const maxSize = 2 * 1024 * 1024; // 2MB
+                if (file.size > maxSize) {
+                    const sizeMB = (file.size / (1024 * 1024)).toFixed(2);
+                    showAlert(`Ukuran file terlalu besar (${sizeMB}MB). Maksimal 2MB`, 'error');
+                    return;
+                }
+            }
+
+            // Disable button
+            const submitBtn = form.querySelector('button[type="submit"]');
+            const originalText = submitBtn.innerHTML;
+            submitBtn.disabled = true;
+            submitBtn.innerHTML = '⏳ Mengirim...';
+
+            try {
+                const response = await fetch('/api/submit-konfirmasi-siswa.php', {
+                    method: 'POST',
+                    body: formData
+                });
+
+                const result = await response.json();
+
+                if (result.success) {
+                    showAlert('Konfirmasi berhasil dikirim! ✓', 'success');
+                    // Reload status setelah 1 detik
+                    setTimeout(() => loadKonfirmasiStatus(siswaId), 1000);
+                } else {
+                    showAlert(result.message || 'Terjadi kesalahan', 'error');
+                    submitBtn.disabled = false;
+                    submitBtn.innerHTML = originalText;
+                }
+            } catch (error) {
+                showAlert('Terjadi kesalahan: ' + error.message, 'error');
+                console.error('Error submit konfirmasi:', error);
+                submitBtn.disabled = false;
+                submitBtn.innerHTML = originalText;
+            }
+        }
+
+        // ========================================
+        // RE-UPLOAD IJAZAH
+        // ========================================
+        async function loadReuploadIjazahStatus(siswaId) {
+            try {
+                const response = await fetch(`/api/check-reupload-ijazah.php?siswa_id=${siswaId}`);
+                const result = await response.json();
+
+                if (result.success && result.has_request) {
+                    const container = document.getElementById('reuploadIjazahSection');
+                    
+                    container.innerHTML = `
+                        <div class="data-section" style="border-left: 4px solid #ff5722;">
+                            <h3 style="color: #ff5722; margin-bottom: 15px;">📸 Permintaan Upload Ulang Ijazah</h3>
+                            
+                            <div class="alert" style="background: #fff3e0; border: 1px solid #ff9800; margin-bottom: 15px;">
+                                <div style="padding: 10px;">
+                                    <strong style="color: #e65100; display: block; margin-bottom: 8px;">⚠️ Admin meminta Anda untuk mengupload ulang ijazah</strong>
+                                    <div style="background: white; padding: 12px; border-radius: 4px; border-left: 3px solid #ff5722;">
+                                        <strong style="color: #333;">Catatan Admin:</strong>
+                                        <p style="margin: 5px 0 0 0; color: #555;">${result.catatan_admin}</p>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <form id="formReuploadIjazah" onsubmit="submitReuploadIjazah(event, ${siswaId})" style="background: #fafafa; padding: 20px; border-radius: 6px; border: 1px solid #e0e0e0;">
+                                <div style="margin-bottom: 15px;">
+                                    <label style="display: block; margin-bottom: 8px; font-weight: 600; color: #333;">📄 Upload Ijazah Baru:</label>
+                                    <input type="file" 
+                                           name="ijazah" 
+                                           accept=".jpg,.jpeg,.png" 
+                                           required
+                                           style="width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 4px; font-size: 14px; background: white;">
+                                    <small style="color: #666; display: block; margin-top: 5px;">
+                                        Format: JPG atau PNG | Ukuran Maksimal: 1MB<br>
+                                        Pastikan foto <strong>jelas, tidak blur, dan tidak terpotong</strong>
+                                    </small>
+                                </div>
+                                <button type="submit" class="button button-primary" style="padding: 12px 24px;">
+                                    📤 Upload Ijazah Baru
+                                </button>
+                            </form>
+                        </div>
+                    `;
+                } else {
+                    // Tidak ada permintaan re-upload, sembunyikan section
+                    const container = document.getElementById('reuploadIjazahSection');
+                    if (container) {
+                        container.innerHTML = '';
+                    }
+                }
+            } catch (error) {
+                console.error('Error loading reupload ijazah status:', error);
+            }
+        }
+
+        async function submitReuploadIjazah(event, siswaId) {
+            event.preventDefault();
+            
+            const form = event.target;
+            const formData = new FormData(form);
+            
+            formData.append('siswa_id', siswaId);
+
+            // Validasi file
+            const fileInput = form.querySelector('input[name="ijazah"]');
+            const file = fileInput.files[0];
+
+            if (!file) {
+                showAlert('Silakan pilih file terlebih dahulu', 'error');
+                return;
+            }
+
+            // Validasi ukuran
+            const maxSize = 1 * 1024 * 1024; // 1MB
+            if (file.size > maxSize) {
+                const sizeMB = (file.size / (1024 * 1024)).toFixed(2);
+                showAlert(`Ukuran file terlalu besar (${sizeMB}MB). Maksimal 1MB`, 'error');
+                return;
+            }
+
+            // Validasi tipe file
+            const allowedTypes = ['image/jpeg', 'image/jpg', 'image/png'];
+            if (!allowedTypes.includes(file.type)) {
+                showAlert('Format file tidak valid. Gunakan JPG atau PNG', 'error');
+                return;
+            }
+
+            // Disable button
+            const submitBtn = form.querySelector('button[type="submit"]');
+            const originalText = submitBtn.innerHTML;
+            submitBtn.disabled = true;
+            submitBtn.innerHTML = '⏳ Mengupload...';
+
+            try {
+                const response = await fetch('/api/reupload-ijazah.php', {
+                    method: 'POST',
+                    body: formData
+                });
+
+                const result = await response.json();
+
+                if (result.success) {
+                    showAlert('Ijazah berhasil diupload ulang! ✓', 'success');
+                    // Reload status setelah 1 detik
+                    setTimeout(() => {
+                        loadReuploadIjazahStatus(siswaId);
+                        // Juga reload verval jika perlu update tampilan
+                        if (window.loadVervalBagianB) loadVervalBagianB(siswaId);
+                    }, 1000);
+                } else {
+                    showAlert(result.message || 'Terjadi kesalahan', 'error');
+                    submitBtn.disabled = false;
+                    submitBtn.innerHTML = originalText;
+                }
+            } catch (error) {
+                showAlert('Terjadi kesalahan: ' + error.message, 'error');
+                console.error('Error reupload ijazah:', error);
+                submitBtn.disabled = false;
+                submitBtn.innerHTML = originalText;
+            }
         }
 
         // ========================================

@@ -195,13 +195,14 @@ try {
         // 4. Update status HANYA jika semua Bagian A sudah verified
         if ($all_verified) {
             $status = 'sudah';
-            $stmt = $conn->prepare('UPDATE siswa SET verval_status = ?, updated_at = NOW() WHERE id = ?');
-            $stmt->bind_param('si', $status, $siswa_id);
+            $approval_status = 'pending'; // Set untuk menunggu review admin
+            $stmt = $conn->prepare('UPDATE siswa SET verval_status = ?, verval_approval_status = ?, updated_at = NOW() WHERE id = ?');
+            $stmt->bind_param('ssi', $status, $approval_status, $siswa_id);
             $stmt->execute();
             $stmt->close();
             
             $response['status_updated'] = 'sudah';
-            $response['message'] = 'Data Bagian B berhasil disimpan. Status verval diupdate ke "Sudah" ✓';
+            $response['message'] = 'Data Bagian B berhasil disimpan. Status verval diupdate ke "Sudah" ✓. Menunggu review admin.';
         } else {
             $response['message'] = 'Data Bagian B berhasil disimpan. Silakan lengkapi verifikasi Bagian A untuk menyelesaikan verval.';
             $response['status_updated'] = 'belum';
