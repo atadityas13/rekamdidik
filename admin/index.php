@@ -1,3 +1,15 @@
+<?php
+/**
+ * Admin Dashboard - Memerlukan login
+ */
+session_start();
+
+// Check if user is logged in
+if (!isset($_SESSION['logged_in']) || $_SESSION['logged_in'] !== true) {
+    header('Location: ../auth/login.php');
+    exit();
+}
+?>
 <!DOCTYPE html>
 <html lang="id">
 <head>
@@ -5,6 +17,39 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Admin Dashboard - Verval Rekam Didik</title>
     <link rel="stylesheet" href="../assets/css/style.css">
+    <style>
+        .admin-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 30px;
+        }
+        
+        .admin-header h2 {
+            margin: 0;
+            color: #333;
+        }
+        
+        .header-right {
+            display: flex;
+            gap: 15px;
+            align-items: center;
+        }
+        
+        .user-info {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 8px 12px;
+            background: #f0f0f0;
+            border-radius: 6px;
+            font-size: 14px;
+        }
+        
+        .user-info strong {
+            color: #667eea;
+        }
+    </style>
 </head>
 <body>
     <div class="container">
@@ -14,35 +59,29 @@
         </header>
 
         <div class="card">
-            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 30px;">
+            <div class="admin-header">
                 <h2 style="color: #333;">Daftar Data Siswa</h2>
-                <a href="../index.php" class="button button-secondary">← Kembali ke Verval</a>
+                <div class="header-right">
+                    <div class="user-info">
+                        👤 <strong><?php echo htmlspecialchars($_SESSION['admin_nama'] ?? $_SESSION['admin_username']); ?></strong>
+                    </div>
+                    <a href="../index.php" class="button button-secondary" style="font-size: 13px; padding: 8px 15px;">← Verval</a>
+                    <button id="btnLogout" class="button" style="font-size: 13px; padding: 8px 15px; background: #d32f2f; color: white; border: none; border-radius: 4px; cursor: pointer;">Logout</button>
+                </div>
             </div>
 
             <div id="alertContainer"></div>
 
-            <div class="data-section" style="margin-bottom: 20px;">
-                <h3>📥 Import Data Siswa (Excel)</h3>
-                <p style="color: #666; font-size: 13px; margin-bottom: 10px;">
-                    Upload file .xlsx. Pastikan kolom NISN bertipe teks agar 10 digit tidak terpotong. Jika ada NISN duplikat, proses akan gagal dan ditampilkan daftar duplikat.
-                </p>
-                <form id="importForm" enctype="multipart/form-data">
-                    <div class="data-row">
-                        <div class="form-group" style="margin-bottom: 0;">
-                            <input type="file" id="importFile" name="file" accept=".xlsx" required>
-                            <small style="color: #999; display: block; margin-top: 5px;">Maksimal 2MB, format .xlsx</small>
-                        </div>
-                        <div class="form-group" style="margin-bottom: 0; display: flex; align-items: flex-end;">
-                            <button type="submit" class="button button-success" style="width: 100%;">Import</button>
-                        </div>
-                    </div>
-                </form>
-                <div id="importResult" style="margin-top: 15px;"></div>
+            <!-- Toolbar -->
+            <div style="display: flex; gap: 10px; margin-bottom: 20px; flex-wrap: wrap;">
+                <button id="btnOpenImport" class="button button-success">📥 Impor Data Siswa</button>
+                <button id="btnDeleteAll" class="button button-danger">🗑️ Hapus Semua Data</button>
             </div>
 
+            <!-- Search & Filter -->
             <div style="display: grid; grid-template-columns: 1fr 1fr auto; gap: 15px; margin-bottom: 20px;">
                 <div class="form-group" style="margin-bottom: 0;">
-                    <input type="text" id="searchInput" placeholder="Cari NISN, Nama, atau Email..." style="padding: 10px;">
+                    <input type="text" id="searchInput" placeholder="Cari NISN atau Nama..." style="padding: 10px;">
                 </div>
                 <div class="form-group" style="margin-bottom: 0;">
                     <select id="statusFilter" style="padding: 10px;">
@@ -67,17 +106,17 @@
                         <tr>
                             <th>No</th>
                             <th>NISN</th>
-                            <th>Nama (KK)</th>
-                            <th>Nama (Ijazah)</th>
+                            <th>Nama</th>
                             <th>Status</th>
-                            <th>Ijazah</th>
+                            <th>Perubahan</th>
+                            <th>Scan Ijazah</th>
                             <th>Aksi</th>
                         </tr>
                     </thead>
                     <tbody id="tableBody">
                         <tr>
                             <td colspan="7" style="text-align: center; padding: 40px;">
-                                <p style="color: #999;">Tekan tombol "Cari" untuk memuat data siswa</p>
+                                <p style="color: #999;">Memuat data siswa...</p>
                             </td>
                         </tr>
                     </tbody>
@@ -85,6 +124,33 @@
             </div>
 
             <div id="paginationContainer" style="display: flex; justify-content: center; gap: 10px; margin-top: 30px;"></div>
+        </div>
+    </div>
+
+    <!-- Modal Import Siswa -->
+    <div id="importModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>📥 Impor Data Siswa (Excel)</h2>
+                <button class="close-modal">&times;</button>
+            </div>
+            <div style="padding: 20px;">
+                <p style="color: #666; font-size: 13px; margin-bottom: 15px;">
+                    Upload file .xlsx. Pastikan kolom NISN bertipe teks agar 10 digit tidak terpotong. Jika ada NISN duplikat, proses akan gagal dan ditampilkan daftar duplikat.
+                </p>
+                <form id="importForm" enctype="multipart/form-data">
+                    <div class="form-group">
+                        <label>Pilih File Excel (.xlsx)</label>
+                        <input type="file" id="importFile" name="file" accept=".xlsx" required>
+                        <small style="color: #999; display: block; margin-top: 5px;">Maksimal 2MB, format .xlsx</small>
+                    </div>
+                    <div id="importResult" style="margin-top: 15px;"></div>
+                    <div style="display: flex; gap: 10px; justify-content: flex-end; margin-top: 20px;">
+                        <button type="button" class="button button-secondary close-modal">Batal</button>
+                        <button type="submit" class="button button-success">Impor Data</button>
+                    </div>
+                </form>
+            </div>
         </div>
     </div>
 
@@ -105,6 +171,57 @@
         let currentSearch = '';
         let currentStatus = '';
 
+        // Logout handler
+        document.getElementById('btnLogout').addEventListener('click', async function() {
+            Swal.fire({
+                title: '🚪 Logout',
+                text: 'Apakah Anda yakin ingin logout?',
+                icon: 'question',
+                showCancelButton: true,
+                confirmButtonColor: '#d32f2f',
+                cancelButtonColor: '#6c757d',
+                confirmButtonText: 'Ya, Logout',
+                cancelButtonText: 'Batal'
+            }).then(async (result) => {
+                if (result.isConfirmed) {
+                    try {
+                        await fetch('../api/auth/logout.php', { method: 'POST' });
+                        window.location.href = '../auth/login.php';
+                    } catch (error) {
+                        showAlert('Terjadi kesalahan: ' + error.message, 'error');
+                    }
+                }
+            });
+        });
+
+        // Modal controls
+        function openModal(modalId) {
+            document.getElementById(modalId).style.display = 'block';
+        }
+
+        function closeModal(modalId) {
+            document.getElementById(modalId).style.display = 'none';
+        }
+
+        document.querySelectorAll('.close-modal').forEach(btn => {
+            btn.addEventListener('click', function() {
+                this.closest('.modal').style.display = 'none';
+            });
+        });
+
+        // Close modal when clicking outside
+        window.addEventListener('click', function(e) {
+            if (e.target.classList.contains('modal')) {
+                e.target.style.display = 'none';
+            }
+        });
+
+        // Open import modal
+        document.getElementById('btnOpenImport').addEventListener('click', function() {
+            openModal('importModal');
+        });
+
+        // Import form handler
         document.getElementById('importForm').addEventListener('submit', async function(e) {
             e.preventDefault();
 
@@ -133,6 +250,13 @@
                     const inserted = result.details && result.details.inserted ? result.details.inserted : 0;
                     resultBox.innerHTML = `<div class="alert alert-success">Berhasil mengimpor ${inserted} data siswa.</div>`;
                     fileInput.value = '';
+                    
+                    // Close modal dan reload data
+                    setTimeout(() => {
+                        closeModal('importModal');
+                        currentPage = 1;
+                        loadData();
+                    }, 1500);
                 } else {
                     showAlert(result.message || 'Import gagal', 'error');
                     resultBox.innerHTML = buildImportErrorHTML(result.details || {});
@@ -142,6 +266,40 @@
             }
         });
 
+        // Delete all handler
+        document.getElementById('btnDeleteAll').addEventListener('click', async function() {
+            Swal.fire({
+                title: '🗑️ Hapus Semua Data',
+                text: 'Apakah Anda yakin ingin menghapus SEMUA data siswa? Tindakan ini tidak dapat dibatalkan!',
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonColor: '#d33',
+                cancelButtonColor: '#6c757d',
+                confirmButtonText: 'Ya, Hapus Semua',
+                cancelButtonText: 'Batal'
+            }).then(async (result) => {
+                if (result.isConfirmed) {
+                    try {
+                        const response = await fetch('../api/admin/delete-all-siswa.php', {
+                            method: 'DELETE'
+                        });
+
+                        const data = await response.json();
+                        if (data.success) {
+                            showAlert('Semua data berhasil dihapus', 'success');
+                            currentPage = 1;
+                            loadData();
+                        } else {
+                            showAlert(data.message || 'Gagal menghapus data', 'error');
+                        }
+                    } catch (error) {
+                        showAlert('Terjadi kesalahan: ' + error.message, 'error');
+                    }
+                }
+            });
+        });
+
+        // Search handler
         document.getElementById('btnSearch').addEventListener('click', function() {
             currentPage = 1;
             currentSearch = document.getElementById('searchInput').value;
@@ -149,23 +307,23 @@
             loadData();
         });
 
-        // Enter key on search input
+        // Enter key on search
         document.getElementById('searchInput').addEventListener('keypress', function(e) {
             if (e.key === 'Enter') {
                 document.getElementById('btnSearch').click();
             }
         });
 
-        // Initial load on page load
+        // Initial load on page load (load all data)
         document.addEventListener('DOMContentLoaded', function() {
-            // Don't load data automatically, wait for search
+            loadData();
         });
 
         async function loadData() {
             const loadingContainer = document.getElementById('loadingContainer');
             const tableBody = document.getElementById('tableBody');
             
-            loadingContainer.style.display = 'block';
+            if (loadingContainer) loadingContainer.style.display = 'block';
             tableBody.innerHTML = '';
 
             try {
@@ -179,7 +337,7 @@
                 const response = await fetch(`../api/admin/list-siswa.php?${params}`);
                 const result = await response.json();
 
-                loadingContainer.style.display = 'none';
+                if (loadingContainer) loadingContainer.style.display = 'none';
 
                 if (result.success) {
                     if (result.data.length === 0) {
@@ -191,21 +349,24 @@
                             const statusBadge = siswa.verval_status === 'sudah' 
                                 ? '<span class="status-badge status-sudah">Sudah Verval</span>'
                                 : '<span class="status-badge status-belum">Belum Verval</span>';
+                            
+                            const nama = siswa.nama_kk || siswa.nama_ijazah || '-';
                             const ijazahLink = siswa.dokumen_ijazah 
-                                ? `<a href="../uploads/ijazah/${siswa.dokumen_ijazah}" target="_blank" style="color: #667eea;">📄 Lihat</a>`
+                                ? `<a href="../uploads/ijazah/${siswa.dokumen_ijazah}" target="_blank" style="color: #667eea; margin-right: 10px;">👁 Lihat</a><a href="../uploads/ijazah/${siswa.dokumen_ijazah}" download style="color: #667eea;">⬇️ Download</a>`
                                 : '<span style="color: #999;">-</span>';
 
                             html += `
                                 <tr>
                                     <td>${no}</td>
                                     <td><strong>${siswa.nisn}</strong></td>
-                                    <td>${siswa.nama_kk || '-'}</td>
-                                    <td>${siswa.nama_ijazah || '-'}</td>
+                                    <td>${nama}</td>
                                     <td>${statusBadge}</td>
+                                    <td id="changes-${siswa.id}"><span style="color: #999;">-</span></td>
                                     <td>${ijazahLink}</td>
                                     <td>
-                                        <div class="table-actions">
-                                            <button class="btn-small btn-view" onclick="viewDetail(${siswa.id})">👁 Lihat</button>
+                                        <div class="table-actions" style="display: flex; gap: 5px; flex-wrap: wrap;">
+                                            <button class="btn-small btn-view" onclick="viewDetail(${siswa.id})" style="font-size: 11px; padding: 5px 8px;">👁 Lihat Data</button>
+                                            <button class="btn-small btn-danger" onclick="cancelVerval(${siswa.id})" style="font-size: 11px; padding: 5px 8px; background: #d32f2f; color: white;">✕ Batalkan</button>
                                         </div>
                                     </td>
                                 </tr>
@@ -213,6 +374,11 @@
                         });
 
                         tableBody.innerHTML = html;
+                        
+                        // Load changes for each row
+                        result.data.forEach(siswa => {
+                            loadChanges(siswa.id);
+                        });
                     }
 
                     // Setup pagination
@@ -221,9 +387,58 @@
                     showAlert(result.message, 'error');
                 }
             } catch (error) {
-                loadingContainer.style.display = 'none';
+                if (loadingContainer) loadingContainer.style.display = 'none';
                 showAlert('Terjadi kesalahan: ' + error.message, 'error');
             }
+        }
+
+        async function loadChanges(siswaId) {
+            try {
+                const response = await fetch(`../api/admin/get-changes.php?id=${siswaId}`);
+                const result = await response.json();
+
+                if (result.success && result.changes.length > 0) {
+                    const changesCell = document.getElementById(`changes-${siswaId}`);
+                    changesCell.innerHTML = result.changes.join(', ');
+                }
+            } catch (error) {
+                console.error('Error loading changes:', error);
+            }
+        }
+
+        async function cancelVerval(siswaId) {
+            Swal.fire({
+                title: '⚠️ Batalkan Verval',
+                text: 'Apakah Anda yakin ingin membatalkan verifikasi siswa ini? Status akan kembali ke "Belum Verval".',
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonColor: '#d32f2f',
+                cancelButtonColor: '#6c757d',
+                confirmButtonText: 'Ya, Batalkan',
+                cancelButtonText: 'Batal'
+            }).then(async (result) => {
+                if (result.isConfirmed) {
+                    try {
+                        const response = await fetch('../api/admin/cancel-verval.php', {
+                            method: 'POST',
+                            headers: {
+                                'Content-Type': 'application/json'
+                            },
+                            body: JSON.stringify({ id: siswaId })
+                        });
+
+                        const data = await response.json();
+                        if (data.success) {
+                            showAlert('Verval berhasil dibatalkan', 'success');
+                            loadData();
+                        } else {
+                            showAlert(data.message || 'Gagal membatalkan verval', 'error');
+                        }
+                    } catch (error) {
+                        showAlert('Terjadi kesalahan: ' + error.message, 'error');
+                    }
+                }
+            });
         }
 
         function setupPagination(pagination) {
