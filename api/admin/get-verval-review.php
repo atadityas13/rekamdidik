@@ -65,15 +65,29 @@ try {
         $stmt->close();
     }
 
-    // 2. Get status konfirmasi untuk semua field yang perlu dikonfirmasi
-    $fields_to_confirm = [
-        'nik_kk', 'nama_kk', 'tempat_lahir_kk', 'tanggal_lahir_kk',
-        'jenis_kelamin_kk', 'nama_ibu_kk', 'nama_ayah_kk',
-        'nisn', 'nama_ijazah', 'tempat_lahir_ijazah', 'tanggal_lahir_ijazah',
-        'jenis_kelamin_ijazah', 'nama_ayah_ijazah',
-        'jenjang_sebelumnya', 'nama_sekolah_asal', 'npsn_sekolah_asal',
-        'nomor_peserta_un', 'nomor_seri_ijazah', 'tahun_lulus'
+    // 2. Get status konfirmasi untuk field yang BENAR-BENAR DIISI di Bagian B
+    // Hanya field dari verval_jenjang_sebelumnya yang ada nilainya yang perlu dikonfirmasi
+    $fields_dalam_bagian_b = [
+        'jenjang_sebelumnya',      // Wajib diisi
+        'nama_sekolah_asal',       // Wajib diisi  
+        'npsn_sekolah_asal',       // Optional
+        'nomor_peserta_un',        // Optional
+        'nomor_seri_ijazah',       // Optional
+        'nomor_seri_skhun',        // Optional
+        'tahun_lulus',             // Wajib diisi
+        'tanggal_terbit_ijazah',   // Optional
+        'dokumen_ijazah'           // Wajib diisi (file)
     ];
+    
+    // Filter: hanya field yang ada nilainya (tidak null/kosong)
+    $fields_to_confirm = [];
+    foreach ($fields_dalam_bagian_b as $field) {
+        // Skip jika field tidak ada di data siswa atau nilainya kosong
+        if (!isset($siswa[$field]) || $siswa[$field] === null || trim($siswa[$field]) === '' || $siswa[$field] === '-') {
+            continue;
+        }
+        $fields_to_confirm[] = $field;
+    }
 
     $konfirmasi_status = [];
     foreach ($fields_to_confirm as $field) {
@@ -142,7 +156,9 @@ try {
     $response['data'] = [
         'siswa' => $siswa,
         'konfirmasi' => $konfirmasi_status,
-        'stats' => $stats
+        'stats' => $stats,
+        'fields_confirmed' => $fields_to_confirm, // Field yang dikonfirmasi
+        'total_fields' => count($fields_to_confirm)
     ];
 
 } catch (Exception $e) {

@@ -88,6 +88,9 @@ function buildReviewModal(data) {
     // Fields List
     buildFieldsList(siswa, konfirmasi);
 
+    // Additional Actions (Upload Ulang Ijazah)
+    buildAdditionalActions(siswa);
+
     // Final Action
     checkFinalAction(stats);
 }
@@ -407,6 +410,35 @@ async function requestReuploadIjazah(siswaId) {
         showAlert('Terjadi kesalahan: ' + error.message, 'error');
         console.error('Error:', error);
     }
+}
+
+/**
+ * Build additional actions area (Upload Ulang Ijazah)
+ */
+function buildAdditionalActions(siswa) {
+    const container = document.getElementById('additionalActionsArea');
+    if (!container) return;
+    
+    container.innerHTML = `
+        <div style="border-top: 2px solid #eee; padding-top: 20px; margin-top: 20px;">
+            <h4 style="margin: 0 0 15px 0; color: #333;">🔄 Aksi Tambahan</h4>
+            <div style="background: #fff3e0; border-left: 4px solid #ff9800; padding: 15px; border-radius: 4px;">
+                <div style="display: flex; align-items: center; gap: 15px;">
+                    <div style="flex: 1;">
+                        <strong style="color: #e65100;">📸 Upload Ulang Ijazah</strong>
+                        <p style="margin: 5px 0 0 0; color: #666; font-size: 13px;">
+                            Jika foto ijazah blur, terpotong, atau tidak jelas, Anda bisa meminta siswa untuk upload ulang.
+                        </p>
+                    </div>
+                    <button onclick="requestReuploadIjazah(${siswa.id})" 
+                            class="btn-small" 
+                            style="background: #ff5722; color: white; padding: 10px 20px; white-space: nowrap;">
+                        📤 Minta Upload Ulang
+                    </button>
+                </div>
+            </div>
+        </div>
+    `;
 }
 
 // Helper functions

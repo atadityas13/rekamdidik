@@ -272,6 +272,11 @@ if (!isset($_SESSION['logged_in']) || $_SESSION['logged_in'] !== true) {
                     </div>
                 </div>
 
+                <!-- Additional Actions (Upload Ulang Ijazah) -->
+                <div id="additionalActionsArea" style="margin-top: 20px;">
+                    <!-- Will be populated by buildAdditionalActions() -->
+                </div>
+
                 <!-- Final Action -->
                 <div id="finalActionArea" style="margin-top: 20px; padding: 20px; background: #f8f9fa; border-radius: 8px; text-align: center;">
                     <!-- Will show when all approved -->
