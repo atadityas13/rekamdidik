@@ -49,7 +49,7 @@
         </div>
 
         <div style="text-align: center; margin-top: 40px; color: white; font-size: 12px;">
-            <p>© 2024 MTsN 11 Majalengka | Verval Rekam Didik Jenjang Sebelumnya</p>
+            <p>© 2026 MTsN 11 Majalengka | Verval Rekam Didik Jenjang Sebelumnya</p>
         </div>
     </div>
 
@@ -301,8 +301,8 @@
                         </div>
 
                         <div class="button-group">
-                            <button type="submit" class="button button-success">💾 Simpan Data Verval</button>
-                            <button type="reset" class="button button-secondary">↺ Reset Form</button>
+                            <button type="submit" class="button button-success">💾 Submit Data Verval</button>
+                            <button type="reset" class="button button-secondary">↺ Ulangi Pengisian</button>
                         </div>
                     </form>
                 </div>
