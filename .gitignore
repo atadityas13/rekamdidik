@@ -1,2 +1,3 @@
 # Local database override (do not commit)
 config/Database.local.php
+config/Database.php
