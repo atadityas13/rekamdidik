@@ -589,6 +589,16 @@ table tbody tr:hover {
         color: #1f2a44;
     }
 
+    .compare-table td.compare-label::before {
+        content: none;
+    }
+
+    .compare-table td.compare-label {
+        display: block;
+        text-align: center;
+        padding: 14px 16px;
+    }
+
     .compare-label::before {
         content: '';
     }
