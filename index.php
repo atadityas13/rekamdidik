@@ -707,6 +707,79 @@
                         <div class="form-group">
                             <label for="dokumen_ijazah">Upload Dokumen Ijazah Asli (JPG, JPEG, PNG - Max 1MB)</label>
                             <h4><b>*Wajib upload hasil scan Ijazah Asli</b></h4>
+                            
+                            <!-- Panduan Upload Ijazah dengan Contoh Visual -->
+                            <div style="background: #f5f5f5; padding: 15px; border-radius: 8px; margin-bottom: 15px; border-left: 4px solid #667eea;">
+                                <h5 style="margin-top: 0; color: #333; font-size: 14px;">📋 Panduan Upload Ijazah</h5>
+                                
+                                <!-- Contoh Visual -->
+                                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-bottom: 15px;">
+                                    <!-- Contoh BENAR -->
+                                    <div style="background: white; padding: 12px; border-radius: 6px; border: 3px solid #4caf50;">
+                                        <div style="color: #4caf50; font-weight: 600; font-size: 12px; margin-bottom: 10px;">✓ CONTOH BENAR</div>
+                                        <div style="background: linear-gradient(135deg, #fce4ec 0%, #f8bbd0 50%, #f48fb1 100%); border: 1px solid #ddd; border-radius: 4px; aspect-ratio: 3/4; display: flex; align-items: center; justify-content: center; margin-bottom: 8px; position: relative; overflow: hidden;">
+                                            <div style="text-align: center; color: #666; font-size: 11px; padding: 10px;">
+                                                <div style="font-size: 40px; margin-bottom: 5px;">📜</div>
+                                                <div style="font-weight: 600;">IJAZAH</div>
+                                                <div style="font-size: 9px; margin-top: 3px;">Jelas, Lengkap, Lurus</div>
+                                            </div>
+                                        </div>
+                                        <ul style="margin: 0; padding-left: 15px; font-size: 11px; color: #555; line-height: 1.5; background: #f1f8e9; padding: 8px 12px; border-radius: 4px;">
+                                            <li>✓ Bagian depan saja</li>
+                                            <li>✓ Jelas dan terang</li>
+                                            <li>✓ Tidak terpotong</li>
+                                            <li>✓ Posisi lurus</li>
+                                        </ul>
+                                    </div>
+                                    
+                                    <!-- Contoh SALAH (multiple) -->
+                                    <div style="background: white; padding: 12px; border-radius: 6px; border: 3px solid #f44336;">
+                                        <div style="color: #f44336; font-weight: 600; font-size: 12px; margin-bottom: 10px;">✗ CONTOH SALAH</div>
+                                        
+                                        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-bottom: 8px;">
+                                            <!-- Buram -->
+                                            <div style="background: #ddd; border: 1px solid #999; border-radius: 4px; aspect-ratio: 1; display: flex; align-items: center; justify-content: center; filter: blur(3px); opacity: 0.6;">
+                                                <div style="text-align: center; color: #666; font-size: 22px;">📜</div>
+                                            </div>
+                                            <div style="font-size: 10px; color: #d32f2f;">
+                                                <div style="font-weight: 600;">Buram</div>
+                                                <div style="color: #666; margin-top: 2px;">Gambar tidak jelas</div>
+                                            </div>
+                                        </div>
+                                        
+                                        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-bottom: 8px;">
+                                            <!-- Terpotong -->
+                                            <div style="background: linear-gradient(135deg, #ffe0b2 0%, #ffcc80 100%); border: 1px solid #ddd; border-radius: 4px; aspect-ratio: 1; display: flex; align-items: center; justify-content: center; overflow: hidden;">
+                                                <div style="text-align: center; color: #666; font-size: 22px; transform: translate(15px, 15px);">📜</div>
+                                            </div>
+                                            <div style="font-size: 10px; color: #d32f2f;">
+                                                <div style="font-weight: 600;">Terpotong</div>
+                                                <div style="color: #666; margin-top: 2px;">Bagian hilang/crop</div>
+                                            </div>
+                                        </div>
+                                        
+                                        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 8px;">
+                                            <!-- Miring -->
+                                            <div style="background: linear-gradient(135deg, #fce4ec 0%, #f8bbd0 100%); border: 1px solid #ddd; border-radius: 4px; aspect-ratio: 1; display: flex; align-items: center; justify-content: center;">
+                                                <div style="text-align: center; color: #666; font-size: 22px; transform: rotate(-30deg);">📜</div>
+                                            </div>
+                                            <div style="font-size: 10px; color: #d32f2f;">
+                                                <div style="font-weight: 600;">Miring</div>
+                                                <div style="color: #666; margin-top: 2px;">Posisi tidak lurus</div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                
+                                <!-- Kriteria Detail -->
+                                <div style="background: white; padding: 12px; border-radius: 6px; border-left: 3px solid #667eea;">
+                                    <div style="font-size: 11px; color: #555; line-height: 1.7;">
+                                        <div style="margin-bottom: 8px;"><strong style="color: #4caf50;">✓ HARUS:</strong> Hanya bagian depan ijazah, gambar terang/jelas, semua teks terlihat, posisi lurus, proporsi normal</div>
+                                        <div><strong style="color: #f44336;">✗ HINDARI:</strong> Bagian belakang, gambar buram/gelap, ada yang terpotong, posisi miring/terbalik, terlalu dekat atau terlalu jauh</div>
+                                    </div>
+                                </div>
+                            </div>
+                            
                             <input type="file" id="dokumen_ijazah" name="dokumen_ijazah" accept=".jpg,.jpeg,.png" required>
                             ${siswa.verval_data?.dokumen_ijazah ? `<small style="color: #666; margin-top: 5px; display: block;">📎 File saat ini: <a href="/uploads/ijazah/${siswa.verval_data.dokumen_ijazah}" target="_blank" style="color: #667eea; text-decoration: underline;">📥 Download Dokumen</a></small>` : ''}
                         </div>
