@@ -381,7 +381,7 @@
                     <h3>🏫 Bagian B: Verval Rekam Didik Jenjang Sebelumnya</h3>
                     
                     <form id="vervalForm">
-                        <input type="hidden" id="siswa_id" value="${siswa.id}">
+                        <input type="hidden" id="siswa_id" name="siswa_id" value="${siswa.id}">
                         
                         <div class="data-row">
                             <div class="form-group">
@@ -592,6 +592,17 @@
                 });
             });
 
+            // Helper function to ensure checkboxes have name attribute for FormData
+            function ensureCheckboxNames() {
+                document.querySelectorAll('.verify-checkbox').forEach(checkbox => {
+                    const verifyField = checkbox.getAttribute('data-verify-field');
+                    if (verifyField && !checkbox.getAttribute('name')) {
+                        checkbox.setAttribute('name', verifyField);
+                        checkbox.setAttribute('value', '1');
+                    }
+                });
+            }
+
             // Handle verval form submission
             document.getElementById('vervalForm').addEventListener('submit', async function(e) {
                 e.preventDefault();
@@ -623,10 +634,13 @@
                     return;
                 }
 
+                // Ensure all checkboxes have name attribute before collecting FormData
+                ensureCheckboxNames();
+
                 const formData = new FormData(this);
                 
                 try {
-                    const response = await fetch('/api/update-verval.php', {
+                    const response = await fetch('/api/save-verval-complete.php', {
                         method: 'POST',
                         body: formData
                     });
@@ -634,7 +648,8 @@
                     const result = await response.json();
 
                     if (result.success) {
-                        showAlert('Data verval berhasil disimpan', 'success');
+                        console.log('Verval saved:', result.saved_data);
+                        showAlert('Data verval berhasil disimpan lengkap ✓', 'success');
                         setTimeout(() => {
                             location.reload();
                         }, 2000);
