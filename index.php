@@ -726,50 +726,48 @@
                                 
                                 <!-- Contoh SALAH -->
                                 <div style="background: white; padding: 8px; border-radius: 4px; border: 2px solid #f44336;">
-                                    <div style="color: #f44336; font-weight: 600; font-size: 11px; margin-bottom: 6px;">✗ JANGAN - Kondisi Ditolak</div>
+                                    <div style="color: #f44336; font-weight: 600; font-size: 11px; margin-bottom: 8px;">✗ JANGAN - Kondisi Ditolak</div>
                                     
                                     <!-- Baris 1: Buram & Gelap (kecil) -->
-                                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 6px; margin-bottom: 8px;">
+                                    <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 4px; margin-bottom: 6px;">
                                         <!-- Buram -->
                                         <div>
-                                            <small style="color: #d32f2f; font-weight: 600; font-size: 9px; display: block; margin-bottom: 3px;">Buram</small>
-                                            <img src="/assets/images/contohijazah.jpg" alt="Buram" style="width: 100%; height: auto; border-radius: 3px; border: 1px solid #ddd; filter: blur(4px); max-width: 110px;">
+                                            <small style="color: #d32f2f; font-weight: 600; font-size: 9px; display: block; margin-bottom: 2px;">Buram</small>
+                                            <img src="/assets/images/contohijazah.jpg" alt="Buram" style="width: 100%; height: auto; border-radius: 3px; border: 1px solid #ddd; filter: blur(4px); max-width: 100px;">
                                         </div>
                                         <!-- Gelap -->
                                         <div>
-                                            <small style="color: #d32f2f; font-weight: 600; font-size: 9px; display: block; margin-bottom: 3px;">Gelap</small>
-                                            <img src="/assets/images/contohijazah.jpg" alt="Gelap" style="width: 100%; height: auto; border-radius: 3px; border: 1px solid #ddd; filter: brightness(0.4); max-width: 110px;">
+                                            <small style="color: #d32f2f; font-weight: 600; font-size: 9px; display: block; margin-bottom: 2px;">Gelap</small>
+                                            <img src="/assets/images/contohijazah.jpg" alt="Gelap" style="width: 100%; height: auto; border-radius: 3px; border: 1px solid #ddd; filter: brightness(0.4); max-width: 100px;">
+                                        </div>
+                                        <!-- B&W -->
+                                        <div>
+                                            <small style="color: #d32f2f; font-weight: 600; font-size: 9px; display: block; margin-bottom: 2px;">B&W / Buruk</small>
+                                            <img src="/assets/images/contohijazah.jpg" alt="BW" style="width: 100%; height: auto; border-radius: 3px; border: 1px solid #ddd; filter: grayscale(100%) contrast(1.5); max-width: 100px;">
                                         </div>
                                     </div>
                                     
                                     <!-- Baris 2: Terpotong, Terlalu Dekat, Miring (full size) -->
-                                    <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 6px; margin-bottom: 8px;">
-                                        <!-- Terpotong -->
+                                    <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 4px;">
+                                        <!-- Terpotong (bagian bawah terpotong) -->
                                         <div>
-                                            <small style="color: #d32f2f; font-weight: 600; font-size: 9px; display: block; margin-bottom: 3px;">Terpotong</small>
-                                            <img src="/assets/images/contohijazah.jpg" alt="Terpotong" style="width: 100%; height: auto; border-radius: 3px; border: 1px solid #ddd; max-width: 130px; object-fit: cover;">
+                                            <small style="color: #d32f2f; font-weight: 600; font-size: 9px; display: block; margin-bottom: 2px;">Terpotong</small>
+                                            <div style="width: 100%; height: 120px; border-radius: 3px; border: 1px solid #ddd; overflow: hidden;">
+                                                <img src="/assets/images/contohijazah.jpg" alt="Terpotong" style="width: 100%; height: auto; display: block; margin-top: -20px;">
+                                            </div>
                                         </div>
-                                        <!-- Terlalu Dekat -->
+                                        <!-- Terlalu Dekat (zoom tinggi) -->
                                         <div>
-                                            <small style="color: #d32f2f; font-weight: 600; font-size: 9px; display: block; margin-bottom: 3px;">Terlalu Dekat</small>
-                                            <img src="/assets/images/contohijazah.jpg" alt="Dekat" style="width: 200%; height: auto; border-radius: 3px; border: 1px solid #ddd; max-width: 130px; object-fit: cover; object-position: center;">
+                                            <small style="color: #d32f2f; font-weight: 600; font-size: 9px; display: block; margin-bottom: 2px;">Terlalu Dekat</small>
+                                            <div style="width: 100%; height: 120px; border-radius: 3px; border: 1px solid #ddd; overflow: hidden; background: #fafafa;">
+                                                <img src="/assets/images/contohijazah.jpg" alt="Dekat" style="width: 280%; height: 280%; display: block; object-fit: cover; object-position: 35% 15%; border-radius: 2px;">
+                                            </div>
                                         </div>
                                         <!-- Miring -->
                                         <div>
-                                            <small style="color: #d32f2f; font-weight: 600; font-size: 9px; display: block; margin-bottom: 3px;">Miring</small>
-                                            <img src="/assets/images/contohijazah.jpg" alt="Miring" style="width: 100%; height: auto; border-radius: 3px; border: 1px solid #ddd; transform: rotate(-15deg); transform-origin: center; display: block; max-width: 130px;">
+                                            <small style="color: #d32f2f; font-weight: 600; font-size: 9px; display: block; margin-bottom: 2px;">Miring</small>
+                                            <img src="/assets/images/contohijazah.jpg" alt="Miring" style="width: 100%; height: auto; border-radius: 3px; border: 1px solid #ddd; transform: rotate(-15deg); transform-origin: center; display: block; max-width: 120px;">
                                         </div>
-                                    </div>
-                                    
-                                    <!-- Baris 3: B&W (kecil) -->
-                                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 6px;">
-                                        <!-- B&W -->
-                                        <div>
-                                            <small style="color: #d32f2f; font-weight: 600; font-size: 9px; display: block; margin-bottom: 3px;">B&W / Buruk</small>
-                                            <img src="/assets/images/contohijazah.jpg" alt="BW" style="width: 100%; height: auto; border-radius: 3px; border: 1px solid #ddd; filter: grayscale(100%) contrast(1.5); max-width: 110px;">
-                                        </div>
-                                        <!-- Placeholder untuk keseimbangan -->
-                                        <div></div>
                                     </div>
                                 </div>
                             </div>
