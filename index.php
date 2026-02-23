@@ -218,10 +218,57 @@
         });
 
         // Helper functions - Global untuk digunakan di berbagai tempat
-        function formatDate(date) {
+function formatDate(date) {
             if (!date) return '-';
             const d = new Date(date);
             return d.toLocaleDateString('id-ID', { day: '2-digit', month: 'long', year: 'numeric' });
+        }
+
+        // ========================================
+        // IJAZAH UPLOAD HANDLERS
+        // ========================================
+        function handleIjazahChange(input) {
+            if (input.files && input.files[0]) {
+                const file = input.files[0];
+                
+                // Validasi ukuran file (1MB = 1024 * 1024 bytes)
+                const maxSize = 1 * 1024 * 1024;
+                if (file.size > maxSize) {
+                    const sizeMB = (file.size / (1024 * 1024)).toFixed(2);
+                    showAlert('Ukuran file terlalu besar (' + sizeMB + 'MB). Maksimal 1MB', 'error');
+                    input.value = ''; // Reset input
+                    return;
+                }
+                
+                // Validasi tipe file
+                const allowedTypes = ['image/jpeg', 'image/jpg', 'image/png'];
+                if (!allowedTypes.includes(file.type)) {
+                    showAlert('Format file tidak valid. Gunakan JPG atau PNG', 'error');
+                    input.value = ''; // Reset input
+                    return;
+                }
+                
+                // Tampilkan preview
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    document.getElementById('ijazahPreview').src = e.target.result;
+                    document.getElementById('ijazahFileName').textContent = file.name;
+                    document.getElementById('ijazahPreviewContainer').style.display = 'block';
+                };
+                reader.readAsDataURL(file);
+            }
+        }
+
+        function clearIjazahPreview() {
+            // Reset file inputs
+            document.getElementById('ijazahGalery').value = '';
+            document.getElementById('ijazahCamera').value = '';
+            document.getElementById('dokumen_ijazah').value = '';
+            
+            // Hide preview
+            document.getElementById('ijazahPreviewContainer').style.display = 'none';
+            document.getElementById('ijazahPreview').src = '';
+            document.getElementById('ijazahFileName').textContent = '-';
         }
 
         function formatTime(datetime) {
