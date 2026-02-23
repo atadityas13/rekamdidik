@@ -13,39 +13,102 @@
             <p>Jenjang Sebelum MTsN 11 Majalengka</p>
         </header>
 
+        <!-- Warning Banner & Countdown -->
+        <div id="countdownBanner" style="background: linear-gradient(135deg, #ff6b6b 0%, #ee5a6f 100%); color: white; border-radius: 10px; padding: 25px; margin-bottom: 30px; box-shadow: 0 4px 15px rgba(255, 107, 107, 0.3); border-left: 5px solid #ffd700;">
+            <div style="display: flex; align-items: center; gap: 15px; margin-bottom: 15px;">
+                <span style="font-size: 28px;">⏰</span>
+                <div>
+                    <h3 style="margin: 0; font-size: 20px;">Batas Waktu Verval</h3>
+                    <p style="margin: 5px 0 0 0; font-size: 13px; opacity: 0.9;">Segera selesaikan verifikasi data Anda sebelum terlambat!</p>
+                </div>
+            </div>
+            
+            <div style="background: rgba(0,0,0,0.2); border-radius: 8px; padding: 20px; text-align: center;">
+                <div style="display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; margin-bottom: 15px;">
+                    <div>
+                        <div id="countdown-days" style="font-size: 32px; font-weight: bold;">0</div>
+                        <div style="font-size: 11px; text-transform: uppercase; letter-spacing: 1px;">Hari</div>
+                    </div>
+                    <div>
+                        <div id="countdown-hours" style="font-size: 32px; font-weight: bold;">0</div>
+                        <div style="font-size: 11px; text-transform: uppercase; letter-spacing: 1px;">Jam</div>
+                    </div>
+                    <div>
+                        <div id="countdown-minutes" style="font-size: 32px; font-weight: bold;">0</div>
+                        <div style="font-size: 11px; text-transform: uppercase; letter-spacing: 1px;">Menit</div>
+                    </div>
+                    <div>
+                        <div id="countdown-seconds" style="font-size: 32px; font-weight: bold;">0</div>
+                        <div style="font-size: 11px; text-transform: uppercase; letter-spacing: 1px;">Detik</div>
+                    </div>
+                </div>
+                <p style="margin: 10px 0 0 0; font-size: 13px; opacity: 0.9;">
+                    <strong>Deadline:</strong> 27 Februari 2026 Pukul 22:00 WIB
+                </p>
+            </div>
+
+            <div id="urgentWarning" style="margin-top: 15px; padding: 12px; background: rgba(0,0,0,0.3); border-radius: 6px; text-align: center; font-size: 13px; display: none;">
+                <strong>⚠️ PERHATIAN PENTING!</strong><br>
+                Waktu tersisa kurang dari 24 jam. Segera lakukan verifikasi data Anda!
+            </div>
+        </div>
+
         <div class="card">
             <h2 style="margin-bottom: 30px; color: #333;">Periksa Status Verval Anda</h2>
             
             <div id="alertContainer"></div>
 
-            <form id="nisnForm">
-                <div class="form-group">
-                    <label for="nisn">Masukkan NISN Anda</label>
-                    <input 
-                        type="text" 
-                        id="nisn" 
-                        name="nisn" 
-                        placeholder="Contoh: 0123456789"
-                        maxlength="10"
-                        inputmode="numeric"
-                        required
-                    >
-                    <small style="color: #999; margin-top: 5px; display: block;">NISN harus 10 digit</small>
+            <!-- Form untuk verval aktif -->
+            <div id="vervalFormContainer">
+                <form id="nisnForm">
+                    <div class="form-group">
+                        <label for="nisn">Masukkan NISN Anda</label>
+                        <input 
+                            type="text" 
+                            id="nisn" 
+                            name="nisn" 
+                            placeholder="Contoh: 0123456789"
+                            maxlength="10"
+                            inputmode="numeric"
+                            required
+                        >
+                        <small style="color: #999; margin-top: 5px; display: block;">NISN harus 10 digit</small>
+                    </div>
+
+                    <button type="submit" class="button button-primary button-large" style="width: 100%; padding: 15px;">
+                        Periksa Status
+                    </button>
+                </form>
+
+                <div id="loadingContainer" style="display: none; margin-top: 30px;">
+                    <div class="loading">
+                        <div class="spinner"></div>
+                        <p>Sedang mencari data Anda...</p>
+                    </div>
                 </div>
 
-                <button type="submit" class="button button-primary button-large" style="width: 100%; padding: 15px;">
-                    Periksa Status
-                </button>
-            </form>
-
-            <div id="loadingContainer" style="display: none; margin-top: 30px;">
-                <div class="loading">
-                    <div class="spinner"></div>
-                    <p>Sedang mencari data Anda...</p>
-                </div>
+                <div id="resultContainer" style="display: none; margin-top: 30px;"></div>
             </div>
 
-            <div id="resultContainer" style="display: none; margin-top: 30px;"></div>
+            <!-- Pesan ketika verval sudah ditutup -->
+            <div id="vervalClosedMessage" style="display: none;">
+                <div style="text-align: center; padding: 40px 20px;">
+                    <div style="font-size: 48px; margin-bottom: 20px;">🔒</div>
+                    <h3 style="color: #333; font-size: 22px; margin-bottom: 15px;">Periode Verval Telah Berakhir</h3>
+                    <p style="color: #666; font-size: 15px; margin-bottom: 20px;">
+                        Maaf, waktu untuk melakukan verifikasi data sudah ditutup pada 27 Februari 2026 pukul 22:00 WIB.
+                    </p>
+                    <div style="background: #f0f0f0; padding: 20px; border-radius: 8px; margin-bottom: 20px;">
+                        <p style="color: #666; margin: 0; font-size: 14px;">
+                            <strong>Jika ada pertanyaan atau kendala, silahkan hubungi:</strong><br>
+                            <span style="color: #667eea; font-size: 16px; font-weight: bold;">📞 Admin Sekolah</span>
+                        </p>
+                    </div>
+                    <p style="color: #999; font-size: 13px; margin: 0;">
+                        © 2026 MTsN 11 Majalengka | Verval Rekam Didik Jenjang Sebelumnya
+                    </p>
+                </div>
+            </div>
         </div>
 
         <div style="text-align: center; margin-top: 40px; color: white; font-size: 12px;">
@@ -56,6 +119,64 @@
     <script src="assets/js/utils.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <script>
+        // Countdown Timer untuk Verval Deadline
+        const VERVAL_DEADLINE = new Date('2026-02-27T22:00:00+07:00');
+
+        function initCountdownTimer() {
+            function updateCountdown() {
+                const now = new Date();
+                const diff = VERVAL_DEADLINE - now;
+
+                if (diff <= 0) {
+                    // Verval sudah ditutup
+                    document.getElementById('countdown-days').textContent = '0';
+                    document.getElementById('countdown-hours').textContent = '0';
+                    document.getElementById('countdown-minutes').textContent = '0';
+                    document.getElementById('countdown-seconds').textContent = '0';
+                    document.getElementById('countdownBanner').style.background = 'linear-gradient(135deg, #8B0000 0%, #4a0000 100%)';
+                    document.getElementById('countdownBanner').innerHTML = `
+                        <div style="text-align: center; padding: 20px;">
+                            <h3 style="margin: 0; font-size: 24px; color: white;">⏹️ VERVAL SUDAH DITUTUP</h3>
+                            <p style="margin: 10px 0 0 0; font-size: 14px; color: #ffcccc;">Periode verifikasi data telah berakhir pada 27 Februari 2026 pukul 22:00 WIB</p>
+                        </div>
+                    `;
+                    
+                    // Sembunyikan form dan tampilkan pesan closed
+                    document.getElementById('vervalFormContainer').style.display = 'none';
+                    document.getElementById('vervalClosedMessage').style.display = 'block';
+                    return;
+                }
+
+                // Verval masih aktif - tampilkan form
+                document.getElementById('vervalFormContainer').style.display = 'block';
+                document.getElementById('vervalClosedMessage').style.display = 'none';
+
+                const days = Math.floor(diff / (1000 * 60 * 60 * 24));
+                const hours = Math.floor((diff % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+                const minutes = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
+                const seconds = Math.floor((diff % (1000 * 60)) / 1000);
+
+                document.getElementById('countdown-days').textContent = String(days).padStart(2, '0');
+                document.getElementById('countdown-hours').textContent = String(hours).padStart(2, '0');
+                document.getElementById('countdown-minutes').textContent = String(minutes).padStart(2, '0');
+                document.getElementById('countdown-seconds').textContent = String(seconds).padStart(2, '0');
+
+                // Show urgent warning jika kurang dari 24 jam
+                const hoursLeft = (diff / (1000 * 60 * 60));
+                if (hoursLeft < 24 && hoursLeft > 0) {
+                    document.getElementById('urgentWarning').style.display = 'block';
+                } else {
+                    document.getElementById('urgentWarning').style.display = 'none';
+                }
+            }
+
+            updateCountdown();
+            setInterval(updateCountdown, 1000);
+        }
+
+        // Initialize countdown saat page load
+        document.addEventListener('DOMContentLoaded', initCountdownTimer);
+
         document.getElementById('nisnForm').addEventListener('submit', async function(e) {
             e.preventDefault();
             
