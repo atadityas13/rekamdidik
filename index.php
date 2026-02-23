@@ -715,7 +715,7 @@
                                 <!-- Contoh BENAR -->
                                 <div style="background: white; padding: 8px; border-radius: 4px; border: 2px solid #4caf50; margin-bottom: 10px;">
                                     <div style="color: #4caf50; font-weight: 600; font-size: 11px; margin-bottom: 6px;">✓ CONTOH BENAR</div>
-                                    <img src="/assets/images/contohijazah.jpg" alt="Contoh Ijazah Benar" style="max-width: 280px; height: auto; border-radius: 3px; border: 1px solid #ddd; margin-bottom: 6px; display: block;">
+                                    <img src="/assets/images/contohijazah.jpg" alt="Contoh Ijazah Benar" style="max-width: 200px; height: auto; border-radius: 3px; border: 1px solid #ddd; margin-bottom: 6px; display: block;">
                                     <ul style="margin: 0; padding-left: 18px; font-size: 10px; color: #555; line-height: 1.4; background: #f1f8e9; padding: 6px 8px; border-radius: 3px; margin: 0;">
                                         <li>✓ Bagian depan saja</li>
                                         <li>✓ Jelas dan terang</li>
@@ -732,12 +732,12 @@
                                         <!-- Buram -->
                                         <div>
                                             <small style="color: #d32f2f; font-weight: 600; font-size: 9px; display: block; margin-bottom: 3px;">Buram</small>
-                                            <img src="/assets/images/contohijazah.jpg" alt="Buram" style="width: 100%; height: auto; border-radius: 3px; border: 1px solid #ddd; filter: blur(4px);">
+                                            <img src="/assets/images/contohijazah.jpg" alt="Buram" style="width: 100%; height: auto; border-radius: 3px; border: 1px solid #ddd; filter: blur(4px); max-width: 110px;">
                                         </div>
                                         <!-- Gelap -->
                                         <div>
                                             <small style="color: #d32f2f; font-weight: 600; font-size: 9px; display: block; margin-bottom: 3px;">Gelap</small>
-                                            <img src="/assets/images/contohijazah.jpg" alt="Gelap" style="width: 100%; height: auto; border-radius: 3px; border: 1px solid #ddd; filter: brightness(0.4);">
+                                            <img src="/assets/images/contohijazah.jpg" alt="Gelap" style="width: 100%; height: auto; border-radius: 3px; border: 1px solid #ddd; filter: brightness(0.4); max-width: 110px;">
                                         </div>
                                     </div>
                                     
@@ -745,23 +745,21 @@
                                         <!-- Terpotong -->
                                         <div>
                                             <small style="color: #d32f2f; font-weight: 600; font-size: 9px; display: block; margin-bottom: 3px;">Terpotong</small>
-                                            <div style="width: 100%; height: 140px; border-radius: 3px; border: 1px solid #ddd; overflow: hidden;">
-                                                <img src="/assets/images/contohijazah.jpg" alt="Terpotong" style="width: 100%; height: 100%; object-fit: cover; object-position: center top;">
+                                            <div style="width: 100%; height: 100px; border-radius: 3px; border: 1px solid #ddd; overflow: hidden;">
+                                                <img src="/assets/images/contohijazah.jpg" alt="Terpotong" style="width: 100%; height: auto; display: block;">
                                             </div>
                                         </div>
                                         <!-- Zoom In -->
                                         <div>
                                             <small style="color: #d32f2f; font-weight: 600; font-size: 9px; display: block; margin-bottom: 3px;">Terlalu Dekat</small>
-                                            <div style="width: 100%; height: 140px; border-radius: 3px; border: 1px solid #ddd; overflow: hidden;">
-                                                <img src="/assets/images/contohijazah.jpg" alt="Dekat" style="width: 200%; height: 200%; object-fit: cover; object-position: 30% 20%;">
+                                            <div style="width: 100%; height: 100px; border-radius: 3px; border: 1px solid #ddd; overflow: hidden;">
+                                                <img src="/assets/images/contohijazah.jpg" alt="Dekat" style="width: 250%; height: 250%; object-fit: cover; object-position: center 25%;">
                                             </div>
                                         </div>
                                         <!-- Miring -->
                                         <div>
                                             <small style="color: #d32f2f; font-weight: 600; font-size: 9px; display: block; margin-bottom: 3px;">Miring</small>
-                                            <div style="width: 100%; height: 140px; border-radius: 3px; border: 1px solid #ddd; overflow: hidden; display: flex; align-items: center; justify-content: center; background: #f0f0f0;">
-                                                <img src="/assets/images/contohijazah.jpg" alt="Miring" style="width: 90%; height: auto; border-radius: 2px; transform: rotate(-15deg);">
-                                            </div>
+                                            <img src="/assets/images/contohijazah.jpg" alt="Miring" style="width: 100%; height: auto; border-radius: 3px; border: 1px solid #ddd; transform: rotate(-15deg); transform-origin: center; display: block; max-width: 110px;">
                                         </div>
                                     </div>
                                     
@@ -769,7 +767,7 @@
                                         <!-- B&W -->
                                         <div>
                                             <small style="color: #d32f2f; font-weight: 600; font-size: 9px; display: block; margin-bottom: 3px;">B&W / Buruk</small>
-                                            <img src="/assets/images/contohijazah.jpg" alt="BW" style="width: 100%; height: auto; border-radius: 3px; border: 1px solid #ddd; filter: grayscale(100%) contrast(1.5);">
+                                            <img src="/assets/images/contohijazah.jpg" alt="BW" style="width: 100%; height: auto; border-radius: 3px; border: 1px solid #ddd; filter: grayscale(100%) contrast(1.5); max-width: 110px;">
                                         </div>
                                         <!-- Placeholder untuk keseimbangan -->
                                         <div></div>
