@@ -65,22 +65,35 @@ try {
         $stmt->close();
     }
 
-    // 2. Get status konfirmasi untuk field yang BENAR-BENAR DIISI di Bagian B
-    // Hanya field dari verval_jenjang_sebelumnya yang ada nilainya yang perlu dikonfirmasi
+    // 2. Get fields yang perlu konfirmasi:
+    //    A. Data yang diubah dari Bagian A (masuk ke verval_history)
+    //    B. Data yang diinput di Bagian B (yang ada nilainya)
+    
+    $fields_to_confirm = [];
+    
+    // A. Get fields dari history_perbaikan (data Bagian A yang diubah siswa)
+    $stmt = $conn->prepare('SELECT DISTINCT field_name FROM history_perbaikan WHERE siswa_id = ?');
+    if ($stmt) {
+        $stmt->bind_param('i', $siswa_id);
+        $stmt->execute();
+        $result = $stmt->get_result();
+        while ($row = $result->fetch_assoc()) {
+            $fields_to_confirm[] = $row['field_name'];
+        }
+        $stmt->close();
+    }
+    
+    // B. Get fields dari Bagian B yang diinput (terisi)
     $fields_dalam_bagian_b = [
-        'jenjang_sebelumnya',      // Wajib diisi
-        'nama_sekolah_asal',       // Wajib diisi  
-        'npsn_sekolah_asal',       // Optional
-        'nomor_peserta_un',        // Optional
-        'nomor_seri_ijazah',       // Optional
-        'nomor_seri_skhun',        // Optional
-        'tahun_lulus',             // Wajib diisi
-        'tanggal_terbit_ijazah',   // Optional
-        'dokumen_ijazah'           // Wajib diisi (file)
+        'nama_sd',                  // Wajib
+        'tahun_ajaran_kelulusan',   // Wajib
+        'nip_kepala_sekolah',       // Wajib
+        'nama_kepala_sekolah',      // Wajib
+        'nomor_seri_ijazah',        // Wajib
+        'tanggal_terbit_ijazah',    // Wajib
+        'dokumen_ijazah'            // Wajib (file)
     ];
     
-    // Filter: hanya field yang ada nilainya (tidak null/kosong)
-    $fields_to_confirm = [];
     foreach ($fields_dalam_bagian_b as $field) {
         // Skip jika field tidak ada di data siswa atau nilainya kosong
         if (!isset($siswa[$field]) || $siswa[$field] === null || trim($siswa[$field]) === '' || $siswa[$field] === '-') {
@@ -88,6 +101,9 @@ try {
         }
         $fields_to_confirm[] = $field;
     }
+    
+    // Gabungkan dan hapus duplikat
+    $fields_to_confirm = array_unique($fields_to_confirm);
 
     $konfirmasi_status = [];
     foreach ($fields_to_confirm as $field) {

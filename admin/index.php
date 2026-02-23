@@ -1244,12 +1244,14 @@ if (!isset($_SESSION['logged_in']) || $_SESSION['logged_in'] !== true) {
                 'tanggal_lahir_ijazah': 'Tanggal Lahir pada Ijazah',
                 'jenis_kelamin_ijazah': 'Jenis Kelamin pada Ijazah',
                 'nama_ayah_ijazah': 'Nama Ayah pada Ijazah',
-                'jenjang_sebelumnya': 'Jenjang Sebelumnya',
-                'nama_sekolah_asal': 'Nama Sekolah Asal',
-                'npsn_sekolah_asal': 'NPSN Sekolah Asal',
-                'nomor_peserta_un': 'Nomor Peserta UN',
+                // Bagian B: Verval Jenjang Sebelumnya
+                'nama_sd': 'Nama Sekolah Dasar (SD)',
+                'tahun_ajaran_kelulusan': 'Tahun Ajaran Kelulusan',
+                'nip_kepala_sekolah': 'NIP Kepala Sekolah',
+                'nama_kepala_sekolah': 'Nama Kepala Sekolah',
                 'nomor_seri_ijazah': 'Nomor Seri Ijazah',
-                'tahun_lulus': 'Tahun Lulus'
+                'tanggal_terbit_ijazah': 'Tanggal Terbit Ijazah',
+                'dokumen_ijazah': 'Dokumen Ijazah'
             };
 
             let fieldsHTML = '';

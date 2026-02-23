@@ -39,7 +39,7 @@ try {
         if (isset($_FILES['dokumen_ijazah']) && $_FILES['dokumen_ijazah']['error'] === UPLOAD_ERR_OK) {
             $file = $_FILES['dokumen_ijazah'];
             $allowed_types = ['image/jpeg', 'image/jpg', 'image/png'];
-            $max_size = 1 * 1024 * 1024; // 1MB (diubah dari 2MB)
+            $max_size = 1 * 1024 * 1024; // 1MB
 
             if (!in_array($file['type'], $allowed_types)) {
                 throw new Exception('Format file harus JPG, JPEG, atau PNG');

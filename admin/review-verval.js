@@ -7,6 +7,36 @@
 let currentReviewData = null;
 
 /**
+ * Get field label
+ */
+function getFieldLabel(fieldName) {
+    const fieldLabels = {
+        'nik_kk': 'NIK pada KK',
+        'nama_kk': 'Nama pada KK',
+        'tempat_lahir_kk': 'Tempat Lahir pada KK',
+        'tanggal_lahir_kk': 'Tanggal Lahir pada KK',
+        'jenis_kelamin_kk': 'Jenis Kelamin pada KK',
+        'nama_ibu_kk': 'Nama Ibu pada KK',
+        'nama_ayah_kk': 'Nama Ayah pada KK',
+        'nisn': 'NISN',
+        'nama_ijazah': 'Nama pada Ijazah',
+        'tempat_lahir_ijazah': 'Tempat Lahir pada Ijazah',
+        'tanggal_lahir_ijazah': 'Tanggal Lahir pada Ijazah',
+        'jenis_kelamin_ijazah': 'Jenis Kelamin pada Ijazah',
+        'nama_ayah_ijazah': 'Nama Ayah pada Ijazah',
+        // Bagian B: Verval Jenjang Sebelumnya
+        'nama_sd': 'Nama Sekolah Dasar (SD)',
+        'tahun_ajaran_kelulusan': 'Tahun Ajaran Kelulusan',
+        'nip_kepala_sekolah': 'NIP Kepala Sekolah',
+        'nama_kepala_sekolah': 'Nama Kepala Sekolah',
+        'nomor_seri_ijazah': 'Nomor Seri Ijazah',
+        'tanggal_terbit_ijazah': 'Tanggal Terbit Ijazah',
+        'dokumen_ijazah': 'Dokumen Ijazah'
+    };
+    return fieldLabels[fieldName] || fieldName;
+}
+
+/**
  * Open modal review verval
  */
 async function openReviewVerval(siswaId) {
