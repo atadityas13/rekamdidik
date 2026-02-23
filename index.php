@@ -237,6 +237,24 @@
                 });
             };
 
+            const getFieldLabel = (fieldName) => {
+                const fieldLabels = {
+                    'nik_kk': 'NIK pada KK',
+                    'nama_kk': 'Nama pada KK',
+                    'tempat_lahir_kk': 'Tempat Lahir pada KK',
+                    'tanggal_lahir_kk': 'Tanggal Lahir pada KK',
+                    'jenis_kelamin_kk': 'Jenis Kelamin pada KK',
+                    'nama_ibu_kk': 'Nama Ibu Kandung pada KK',
+                    'nama_ayah_kk': 'Nama Ayah Kandung pada KK',
+                    'nama_ijazah': 'Nama pada Ijazah',
+                    'tempat_lahir_ijazah': 'Tempat Lahir pada Ijazah',
+                    'tanggal_lahir_ijazah': 'Tanggal Lahir pada Ijazah',
+                    'jenis_kelamin_ijazah': 'Jenis Kelamin pada Ijazah',
+                    'nama_ayah_ijazah': 'Nama Ayah Kandung pada Ijazah'
+                };
+                return fieldLabels[fieldName] || fieldName;
+            };
+
             let html = `
                 <div class="alert alert-success" style="margin-bottom: 30px;">
                     <div style="display: flex; align-items: center; gap: 15px;">
@@ -267,7 +285,7 @@
                 </div>
 
                 <div class="data-section">
-                    <h3 style="color: #667eea; margin-bottom: 15px;">📄 Data dari Kartu Keluarga (KK)</h3>
+                    <h3 style="color: #667eea; margin-bottom: 15px;">📄 Data Pada Kartu Keluarga (KK)</h3>
                     <div class="data-row" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 20px;">
                         <div class="data-field">
                             <label style="font-weight: 600; color: #666; display: block; margin-bottom: 5px;">NIK</label>
@@ -322,7 +340,7 @@
                 </div>
 
                 <div class="data-section">
-                    <h3 style="color: #667eea; margin-bottom: 15px;">📜 Data dari Ijazah</h3>
+                    <h3 style="color: #667eea; margin-bottom: 15px;">📜 Data Pada Ijazah</h3>
                     <div class="data-row" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 20px;">
                         <div class="data-field">
                             <label style="font-weight: 600; color: #666; display: block; margin-bottom: 5px;">NISN</label>
@@ -423,7 +441,7 @@
                                 <tbody>
                                     ${siswa.history_perbaikan.map(item => `
                                         <tr>
-                                            <td style="padding: 10px; border-bottom: 1px solid #eee;"><strong>${item.field_name}</strong></td>
+                                            <td style="padding: 10px; border-bottom: 1px solid #eee;"><strong>${getFieldLabel(item.field_name)}</strong></td>
                                             <td style="padding: 10px; border-bottom: 1px solid #eee;">${item.nilai_sebelum || '-'}</td>
                                             <td style="padding: 10px; border-bottom: 1px solid #eee;">${item.nilai_sesudah || '-'}</td>
                                             <td style="padding: 10px; border-bottom: 1px solid #eee;">${formatTime(item.tanggal_perbaikan)}</td>
@@ -442,9 +460,6 @@
 
                 <div style="margin-top: 30px; padding: 20px; background: #f5f7fa; border-radius: 8px; text-align: center;">
                     <p style="margin: 0 0 15px 0; color: #666;">Terima kasih telah melakukan verifikasi dan rekam data dengan benar.</p>
-                    <button type="button" onclick="window.print()" class="btn-primary" style="margin-right: 10px;">
-                        🖨️ Cetak Halaman
-                    </button>
                     <button type="button" onclick="location.reload()" class="btn-secondary">
                         🔄 Cek Lagi
                     </button>
@@ -693,9 +708,9 @@
                         <table>
                             <thead>
                                 <tr>
-                                    <th>Field</th>
-                                    <th>Nilai Sebelum</th>
-                                    <th>Nilai Sesudah</th>
+                                    <th>Data</th>
+                                    <th>Sebelumnya</th>
+                                    <th>Sesudah Perbaikan</th>
                                     <th>Tanggal Perbaikan</th>
                                 </tr>
                             </thead>
@@ -1072,11 +1087,13 @@
                             ></textarea>
                             <small style="color: #999;">Minimal 20 karakter. Jelaskan dengan detail alasan pembatalan.</small>
                         </div>
-                        <div style="display: flex; gap: 10px; align-items: center;">
-                            <button type="submit" class="btn-primary" style="background: #f44336;">
-                                📨 Ajukan Pembatalan
+                        <div style="margin-top: 20px;">
+                            <button type="submit" class="btn-primary" style="background: #f44336; border: none; padding: 12px 24px; font-size: 15px; font-weight: 600; border-radius: 6px; cursor: pointer; transition: all 0.3s; width: 100%; max-width: 300px;">
+                                ⚠️ Ajukan Pembatalan Verval
                             </button>
-                            <small style="color: #999;">Status verval akan direset setelah disetujui admin</small>
+                            <p style="margin: 10px 0 0 0; color: #666; font-size: 13px; line-height: 1.6;">
+                                <strong style="color: #f44336;">⚠️ Perhatian:</strong> Jika disetujui, status verval akan direset dan Anda harus melakukan verifikasi ulang dari awal.
+                            </p>
                         </div>
                     </form>
                 </div>
