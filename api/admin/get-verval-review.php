@@ -31,15 +31,15 @@ try {
     $conn = $db->connect();
 
     // 1. Get data siswa
-    $query = "SELECT s.*, 
-              v.jenjang_sebelumnya, v.nama_sekolah_asal, v.npsn_sekolah_asal,
-              v.nomor_peserta_un, v.nomor_seri_ijazah, v.nomor_seri_skhun,
-              v.tahun_lulus, v.tanggal_terbit_ijazah, v.dokumen_ijazah
+    $query = "SELECT s.* 
               FROM siswa s
-              LEFT JOIN verval_jenjang_sebelumnya v ON s.id = v.siswa_id
               WHERE s.id = ?";
     
     $stmt = $conn->prepare($query);
+    if (!$stmt) {
+        throw new Exception('Database prepare error: ' . $conn->error);
+    }
+    
     $stmt->bind_param('i', $siswa_id);
     $stmt->execute();
     $result = $stmt->get_result();
@@ -50,6 +50,20 @@ try {
     
     $siswa = $result->fetch_assoc();
     $stmt->close();
+    
+    // Get data verval jenjang sebelumnya (jika ada)
+    $stmt = $conn->prepare("SELECT * FROM verval_jenjang_sebelumnya WHERE siswa_id = ?");
+    if ($stmt) {
+        $stmt->bind_param('i', $siswa_id);
+        $stmt->execute();
+        $result_verval = $stmt->get_result();
+        if ($result_verval->num_rows > 0) {
+            $verval_data = $result_verval->fetch_assoc();
+            // Merge ke siswa data
+            $siswa = array_merge($siswa, $verval_data);
+        }
+        $stmt->close();
+    }
 
     // 2. Get status konfirmasi untuk semua field yang perlu dikonfirmasi
     $fields_to_confirm = [
@@ -68,6 +82,21 @@ try {
                                 FROM verval_konfirmasi 
                                 WHERE siswa_id = ? AND field_name = ?
                                 ORDER BY updated_at DESC LIMIT 1');
+        
+        if (!$stmt) {
+            // Jika tabel belum ada, set semua ke pending
+            $konfirmasi_status[$field] = [
+                'status' => 'pending',
+                'tipe_konfirmasi' => null,
+                'catatan_admin' => null,
+                'berkas_pendukung' => null,
+                'pesan_siswa' => null,
+                'nilai_baru_siswa' => null,
+                'updated_at' => null
+            ];
+            continue;
+        }
+        
         $stmt->bind_param('is', $siswa_id, $field);
         $stmt->execute();
         $result = $stmt->get_result();
@@ -83,7 +112,6 @@ try {
                 'berkas_pendukung' => null,
                 'pesan_siswa' => null,
                 'nilai_baru_siswa' => null,
-                'berkas_pendukung' => null,
                 'updated_at' => null
             ];
         }
@@ -120,6 +148,14 @@ try {
 } catch (Exception $e) {
     $response['success'] = false;
     $response['message'] = $e->getMessage();
+    
+    // Log error untuk debugging (optional - hapus di production)
+    error_log('Error in get-verval-review.php: ' . $e->getMessage());
+    
+    // Jika database connection error, tutup koneksi
+    if (isset($conn) && $conn) {
+        $conn->close();
+    }
 }
 
 echo json_encode($response);

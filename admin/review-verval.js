@@ -12,10 +12,30 @@ let currentReviewData = null;
 async function openReviewVerval(siswaId) {
     try {
         const response = await fetch(`../api/admin/get-verval-review.php?siswa_id=${siswaId}`);
-        const result = await response.json();
+        
+        // Cek response status
+        if (!response.ok) {
+            throw new Error(`HTTP error! status: ${response.status}`);
+        }
+        
+        // Ambil text dulu untuk debugging
+        const text = await response.text();
+        
+        // Log response untuk debugging (hapus di production)
+        console.log('API Response:', text);
+        
+        // Parse JSON
+        let result;
+        try {
+            result = JSON.parse(text);
+        } catch (parseError) {
+            console.error('JSON Parse Error:', parseError);
+            console.error('Response text:', text);
+            throw new Error('Invalid JSON response from server. Check console for details.');
+        }
 
         if (!result.success) {
-            showAlert(result.message, 'error');
+            showAlert(result.message || 'Terjadi kesalahan', 'error');
             return;
         }
 
