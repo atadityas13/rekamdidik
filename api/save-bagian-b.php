@@ -39,14 +39,15 @@ try {
         if (isset($_FILES['dokumen_ijazah']) && $_FILES['dokumen_ijazah']['error'] === UPLOAD_ERR_OK) {
             $file = $_FILES['dokumen_ijazah'];
             $allowed_types = ['image/jpeg', 'image/jpg', 'image/png'];
-            $max_size = 2 * 1024 * 1024; // 2MB
+            $max_size = 1 * 1024 * 1024; // 1MB (diubah dari 2MB)
 
             if (!in_array($file['type'], $allowed_types)) {
                 throw new Exception('Format file harus JPG, JPEG, atau PNG');
             }
 
             if ($file['size'] > $max_size) {
-                throw new Exception('Ukuran file maksimal 2MB');
+                $file_size_mb = round($file['size'] / (1024 * 1024), 2);
+                throw new Exception('Ukuran file terlalu besar (' . $file_size_mb . 'MB). Maksimal 1MB');
             }
 
             $ext = pathinfo($file['name'], PATHINFO_EXTENSION);
@@ -60,6 +61,22 @@ try {
             }
             
             $upload_path = $upload_dir . $dokumen_ijazah;
+
+            // Hapus file lama jika ada (saat update)
+            $stmt_check = $conn->prepare('SELECT dokumen_ijazah FROM verval_jenjang_sebelumnya WHERE siswa_id = ?');
+            $stmt_check->bind_param('i', $siswa_id);
+            $stmt_check->execute();
+            $result_check = $stmt_check->get_result();
+            if ($row_check = $result_check->fetch_assoc()) {
+                $old_file = $row_check['dokumen_ijazah'];
+                if (!empty($old_file)) {
+                    $old_path = $upload_dir . $old_file;
+                    if (file_exists($old_path)) {
+                        unlink($old_path);
+                    }
+                }
+            }
+            $stmt_check->close();
 
             if (!move_uploaded_file($file['tmp_name'], $upload_path)) {
                 throw new Exception('Gagal upload file dokumen ijazah');

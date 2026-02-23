@@ -84,6 +84,31 @@ try {
 
         // 3. Jika disetujui, reset status verval siswa & reset semua verified flags
         if ($action === 'setujui') {
+            // 3a. Ambil data file ijazah sebelum dihapus dari database
+            $stmt = $conn->prepare('SELECT dokumen_ijazah FROM verval_jenjang_sebelumnya WHERE siswa_id = ?');
+            if ($stmt) {
+                $stmt->bind_param('i', $siswa_id);
+                $stmt->execute();
+                $result = $stmt->get_result();
+                $dokumen_ijazah = null;
+                if ($row = $result->fetch_assoc()) {
+                    $dokumen_ijazah = $row['dokumen_ijazah'];
+                }
+                $stmt->close();
+                
+                // 3b. Hapus file fisik ijazah dari direktori jika ada
+                if (!empty($dokumen_ijazah)) {
+                    $file_path = '../../uploads/ijazah/' . $dokumen_ijazah;
+                    if (file_exists($file_path)) {
+                        if (!unlink($file_path)) {
+                            // Log error tapi jangan stop proses
+                            error_log("Failed to delete file: " . $file_path);
+                        }
+                    }
+                }
+            }
+            
+            // 3c. Reset status verval siswa
             $stmt = $conn->prepare('UPDATE siswa SET verval_status = "belum", 
                 nik_kk_verified = 0, nisn_verified = 0, nama_kk_verified = 0, 
                 nama_ijazah_verified = 0, tempat_lahir_kk_verified = 0, 
@@ -104,7 +129,7 @@ try {
             }
             $stmt->close();
             
-            // Optional: Hapus data verval jenjang sebelumnya
+            // 3d. Hapus data verval jenjang sebelumnya dari database
             $stmt = $conn->prepare('DELETE FROM verval_jenjang_sebelumnya WHERE siswa_id = ?');
             if ($stmt) {
                 $stmt->bind_param('i', $siswa_id);

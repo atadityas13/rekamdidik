@@ -26,7 +26,31 @@ try {
     // Start transaction
     $conn->begin_transaction();
 
-    // Reset verval_status ke 'belum'
+    // 1. Ambil data file ijazah sebelum dihapus dari database
+    $stmt = $conn->prepare('SELECT dokumen_ijazah FROM verval_jenjang_sebelumnya WHERE siswa_id = ?');
+    if ($stmt) {
+        $stmt->bind_param('i', $siswa_id);
+        $stmt->execute();
+        $result = $stmt->get_result();
+        $dokumen_ijazah = null;
+        if ($row = $result->fetch_assoc()) {
+            $dokumen_ijazah = $row['dokumen_ijazah'];
+        }
+        $stmt->close();
+        
+        // 2. Hapus file fisik ijazah dari direktori jika ada
+        if (!empty($dokumen_ijazah)) {
+            $file_path = '../../uploads/ijazah/' . $dokumen_ijazah;
+            if (file_exists($file_path)) {
+                if (!unlink($file_path)) {
+                    // Log error tapi jangan stop proses
+                    error_log("Failed to delete file: " . $file_path);
+                }
+            }
+        }
+    }
+
+    // 3. Reset verval_status ke 'belum'
     $update_query = "UPDATE siswa SET verval_status = 'belum' WHERE id = ?";
     $stmt = $conn->prepare($update_query);
     $stmt->bind_param('i', $siswa_id);
@@ -36,7 +60,7 @@ try {
     }
     $stmt->close();
 
-    // Reset semua verified flags ke 0
+    // 4. Reset semua verified flags ke 0
     $verified_fields = [
         'nik_kk_verified', 'nama_kk_verified', 'tempat_lahir_kk_verified',
         'tanggal_lahir_kk_verified', 'jenis_kelamin_kk_verified', 'nama_ibu_kk_verified',
@@ -54,6 +78,14 @@ try {
         throw new Exception('Gagal mereset verifikasi field');
     }
     $stmt->close();
+
+    // 5. Hapus data verval jenjang sebelumnya dari database
+    $stmt = $conn->prepare('DELETE FROM verval_jenjang_sebelumnya WHERE siswa_id = ?');
+    if ($stmt) {
+        $stmt->bind_param('i', $siswa_id);
+        $stmt->execute();
+        $stmt->close();
+    }
 
     $conn->commit();
     $conn->close();

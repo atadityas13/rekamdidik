@@ -936,6 +936,19 @@
                     return;
                 }
 
+                // Validasi ukuran file sebelum submit
+                const fileInput = document.getElementById('dokumen_ijazah');
+                if (fileInput && fileInput.files && fileInput.files.length > 0) {
+                    const file = fileInput.files[0];
+                    const maxSize = 1 * 1024 * 1024; // 1MB
+                    
+                    if (file.size > maxSize) {
+                        const fileSizeMB = (file.size / (1024 * 1024)).toFixed(2);
+                        showAlert(`Ukuran file terlalu besar (${fileSizeMB}MB). Maksimal 1MB. Silakan kompres atau resize gambar terlebih dahulu.`, 'error');
+                        return;
+                    }
+                }
+
                 // Collect form data (only Bagian B fields will be used)
                 const formData = new FormData(this);
                 
