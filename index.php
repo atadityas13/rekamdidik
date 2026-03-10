@@ -43,7 +43,7 @@
                     </div>
                 </div>
                 <p style="margin: 10px 0 0 0; font-size: 13px; opacity: 0.9;">
-                    <strong>Deadline:</strong> 27 Februari 2026 Pukul 22:00 WIB
+                    <strong>Deadline:</strong> 13 Maret 2026 Pukul 22:00 WIB
                 </p>
             </div>
 
@@ -96,7 +96,7 @@
                     <div style="font-size: 48px; margin-bottom: 20px;">🔒</div>
                     <h3 style="color: #333; font-size: 22px; margin-bottom: 15px;">Periode Verval Telah Berakhir</h3>
                     <p style="color: #666; font-size: 15px; margin-bottom: 20px;">
-                        Maaf, waktu untuk melakukan verifikasi data sudah ditutup pada 27 Februari 2026 pukul 22:00 WIB.
+                        Maaf, waktu untuk melakukan verifikasi data sudah ditutup pada 13 Maret 2026 pukul 22:00 WIB.
                     </p>
                     <div style="background: #f0f0f0; padding: 20px; border-radius: 8px; margin-bottom: 20px;">
                         <p style="color: #666; margin: 0; font-size: 14px;">
@@ -120,7 +120,7 @@
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <script>
         // Countdown Timer untuk Verval Deadline
-        const VERVAL_DEADLINE = new Date('2026-02-27T22:00:00+07:00');
+        const VERVAL_DEADLINE = new Date('2026-03-13T22:00:00+07:00');
 
         function initCountdownTimer() {
             function updateCountdown() {
