@@ -43,7 +43,7 @@
                     </div>
                 </div>
                 <p style="margin: 10px 0 0 0; font-size: 13px; opacity: 0.9;">
-                    <strong>Deadline:</strong> 13 Maret 2026 Pukul 22:00 WIB
+                    <strong>Deadline:</strong> <span id="deadlineDisplayText">Memuat...</span>
                 </p>
             </div>
 
@@ -96,7 +96,7 @@
                     <div style="font-size: 48px; margin-bottom: 20px;">🔒</div>
                     <h3 style="color: #333; font-size: 22px; margin-bottom: 15px;">Periode Verval Telah Berakhir</h3>
                     <p style="color: #666; font-size: 15px; margin-bottom: 20px;">
-                        Maaf, waktu untuk melakukan verifikasi data sudah ditutup pada 13 Maret 2026 pukul 22:00 WIB.
+                        Maaf, waktu untuk melakukan verifikasi data sudah ditutup pada <span id="deadlineClosedText">memuat deadline...</span>.
                     </p>
                     <div style="background: #f0f0f0; padding: 20px; border-radius: 8px; margin-bottom: 20px;">
                         <p style="color: #666; margin: 0; font-size: 14px;">
@@ -119,13 +119,18 @@
     <script src="assets/js/utils.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <script>
-        // Countdown Timer untuk Verval Deadline
-        const VERVAL_DEADLINE = new Date('2026-03-13T22:00:00+07:00');
+        // Countdown Timer untuk Verval Deadline (setting dari admin)
+        function initCountdownTimer(deadlineIso, deadlineDisplay) {
+            const vervalDeadline = new Date(deadlineIso);
 
-        function initCountdownTimer() {
+            const deadlineDisplayText = document.getElementById('deadlineDisplayText');
+            const deadlineClosedText = document.getElementById('deadlineClosedText');
+            if (deadlineDisplayText) deadlineDisplayText.textContent = deadlineDisplay;
+            if (deadlineClosedText) deadlineClosedText.textContent = deadlineDisplay;
+
             function updateCountdown() {
                 const now = new Date();
-                const diff = VERVAL_DEADLINE - now;
+                const diff = vervalDeadline - now;
 
                 if (diff <= 0) {
                     // Verval sudah ditutup
@@ -137,7 +142,7 @@
                     document.getElementById('countdownBanner').innerHTML = `
                         <div style="text-align: center; padding: 20px;">
                             <h3 style="margin: 0; font-size: 24px; color: white;">⏹️ VERVAL SUDAH DITUTUP</h3>
-                            <p style="margin: 10px 0 0 0; font-size: 14px; color: #ffcccc;">Periode verifikasi data telah berakhir pada 27 Februari 2026 pukul 22:00 WIB</p>
+                            <p style="margin: 10px 0 0 0; font-size: 14px; color: #ffcccc;">Periode verifikasi data telah berakhir pada ${deadlineDisplay}</p>
                         </div>
                     `;
                     
@@ -174,8 +179,27 @@
             setInterval(updateCountdown, 1000);
         }
 
+        async function loadDeadlineAndInitCountdown() {
+            try {
+                const response = await fetch('api/get-verval-deadline.php');
+                const result = await response.json();
+
+                if (!result.success || !result.data || !result.data.deadline_iso) {
+                    throw new Error(result.message || 'Deadline tidak tersedia');
+                }
+
+                initCountdownTimer(result.data.deadline_iso, result.data.deadline_display);
+            } catch (error) {
+                // Fallback agar halaman tetap berjalan meskipun endpoint gagal
+                const fallbackIso = '2026-03-13T22:00:00+07:00';
+                const fallbackDisplay = '13 Maret 2026 Pukul 22:00 WIB';
+                initCountdownTimer(fallbackIso, fallbackDisplay);
+                console.error('Gagal memuat setting deadline:', error);
+            }
+        }
+
         // Initialize countdown saat page load
-        document.addEventListener('DOMContentLoaded', initCountdownTimer);
+        document.addEventListener('DOMContentLoaded', loadDeadlineAndInitCountdown);
 
         document.getElementById('nisnForm').addEventListener('submit', async function(e) {
             e.preventDefault();

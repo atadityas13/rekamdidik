@@ -151,6 +151,20 @@ CREATE TABLE pengajuan_pembatalan (
 );
 
 -- =====================================================
+-- Table: app_settings (Pengaturan Aplikasi)
+-- =====================================================
+CREATE TABLE app_settings (
+    setting_key VARCHAR(100) PRIMARY KEY,
+    setting_value TEXT NOT NULL,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
+);
+
+-- Default setting: deadline verval
+INSERT INTO app_settings (setting_key, setting_value) VALUES
+('verval_deadline', '2026-03-13 22:00:00')
+ON DUPLICATE KEY UPDATE setting_value = VALUES(setting_value);
+
+-- =====================================================
 -- Insert Default Admin User
 -- =====================================================
 INSERT INTO admin_users (username, password, email, nama_lengkap, role) VALUES 

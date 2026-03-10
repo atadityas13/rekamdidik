@@ -89,6 +89,7 @@ if (!isset($_SESSION['logged_in']) || $_SESSION['logged_in'] !== true) {
             <!-- Toolbar -->
             <div style="display: flex; gap: 10px; margin-bottom: 20px; flex-wrap: wrap;">
                 <button id="btnOpenImport" class="button button-success">📥 Impor Data Siswa</button>
+                <button id="btnOpenDeadlineSettings" class="button button-primary">⏰ Atur Waktu Verval</button>
                 <button id="btnPengajuanPembatalan" class="button" style="background: #ff9800; color: white; position: relative;">
                     📋 Pengajuan Pembatalan
                     <span id="badgePengajuanCount" style="display: none; position: absolute; top: -8px; right: -8px; background: #f44336; color: white; border-radius: 50%; width: 24px; height: 24px; font-size: 12px; font-weight: bold; line-height: 24px; text-align: center; box-shadow: 0 2px 4px rgba(0,0,0,0.2); animation: pulse 2s infinite;">0</span>
@@ -160,6 +161,33 @@ if (!isset($_SESSION['logged_in']) || $_SESSION['logged_in'] !== true) {
             </div>
 
             <div id="paginationContainer" style="display: flex; justify-content: center; gap: 10px; margin-top: 30px;"></div>
+        </div>
+    </div>
+
+    <!-- Modal Setting Deadline Verval -->
+    <div id="deadlineSettingsModal" class="modal">
+        <div class="modal-content" style="max-width: 520px;">
+            <div class="modal-header">
+                <h2>⏰ Pengaturan Waktu Verval</h2>
+                <button class="close-modal">&times;</button>
+            </div>
+            <form id="deadlineSettingsForm" style="padding: 0 20px 20px 20px;">
+                <div class="form-group">
+                    <label for="vervalDeadlineInput">Batas Waktu Verval (WIB)</label>
+                    <input type="datetime-local" id="vervalDeadlineInput" required>
+                    <small style="color: #666; display: block; margin-top: 6px;">
+                        Contoh: 2026-03-13 22:00 WIB
+                    </small>
+                </div>
+                <div id="currentDeadlineInfo" style="background: #f5f7fa; border-radius: 6px; padding: 10px 12px; color: #333; font-size: 13px; margin-bottom: 12px;">
+                    Deadline saat ini: memuat...
+                </div>
+                <div id="deadlineResult" style="margin-bottom: 12px;"></div>
+                <div style="display: flex; gap: 10px; justify-content: flex-end;">
+                    <button type="button" class="button button-secondary close-modal">Batal</button>
+                    <button type="submit" class="button button-success">Simpan Deadline</button>
+                </div>
+            </form>
         </div>
     </div>
 
@@ -436,6 +464,47 @@ if (!isset($_SESSION['logged_in']) || $_SESSION['logged_in'] !== true) {
             openModal('importModal');
         });
 
+        // Open deadline settings modal
+        document.getElementById('btnOpenDeadlineSettings').addEventListener('click', async function() {
+            openModal('deadlineSettingsModal');
+            await loadDeadlineSettings();
+        });
+
+        document.getElementById('deadlineSettingsForm').addEventListener('submit', async function(e) {
+            e.preventDefault();
+
+            const deadlineInput = document.getElementById('vervalDeadlineInput').value;
+            const resultBox = document.getElementById('deadlineResult');
+            resultBox.innerHTML = '';
+
+            if (!deadlineInput) {
+                resultBox.innerHTML = '<div class="alert alert-error">Deadline wajib diisi</div>';
+                return;
+            }
+
+            try {
+                const response = await fetch('../api/admin/update-verval-deadline.php', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ deadline: deadlineInput })
+                });
+
+                const result = await response.json();
+
+                if (result.success) {
+                    resultBox.innerHTML = '<div class="alert alert-success">Deadline berhasil diperbarui</div>';
+                    document.getElementById('currentDeadlineInfo').innerHTML = `Deadline saat ini: <strong>${result.data.deadline_display}</strong>`;
+                    showAlert('Pengaturan waktu verval berhasil disimpan', 'success');
+                } else {
+                    resultBox.innerHTML = `<div class="alert alert-error">${result.message}</div>`;
+                }
+            } catch (error) {
+                resultBox.innerHTML = `<div class="alert alert-error">Terjadi kesalahan: ${error.message}</div>`;
+            }
+        });
+
         // Open pengajuan pembatalan modal
         document.getElementById('btnPengajuanPembatalan').addEventListener('click', function() {
             openModal('pengajuanPembatalanModal');
@@ -587,6 +656,32 @@ if (!isset($_SESSION['logged_in']) || $_SESSION['logged_in'] !== true) {
             // Auto-refresh pengajuan count every 30 seconds
             setInterval(loadPengajuanCount, 30000);
         });
+
+        async function loadDeadlineSettings() {
+            const deadlineInput = document.getElementById('vervalDeadlineInput');
+            const currentInfo = document.getElementById('currentDeadlineInfo');
+
+            try {
+                const response = await fetch('../api/get-verval-deadline.php');
+                const result = await response.json();
+
+                if (!result.success) {
+                    throw new Error(result.message || 'Gagal mengambil pengaturan deadline');
+                }
+
+                const iso = result.data.deadline_iso; // e.g. 2026-03-13T22:00:00+07:00
+                const localValue = convertIsoToDatetimeLocal(iso);
+                deadlineInput.value = localValue;
+                currentInfo.innerHTML = `Deadline saat ini: <strong>${result.data.deadline_display}</strong>`;
+            } catch (error) {
+                currentInfo.innerHTML = `<span style="color: #d32f2f;">Gagal memuat deadline: ${error.message}</span>`;
+            }
+        }
+
+        function convertIsoToDatetimeLocal(isoString) {
+            // Ambil komponen tanggal-jam asli agar tidak bergeser oleh timezone browser
+            return String(isoString).slice(0, 16);
+        }
 
         async function loadData() {
             const loadingContainer = document.getElementById('loadingContainer');
