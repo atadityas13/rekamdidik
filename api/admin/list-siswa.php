@@ -15,8 +15,13 @@ try {
     $db = new Database();
     $conn = $db->connect();
 
-    $page = isset($_GET['page']) ? intval($_GET['page']) : 1;
-    $limit = isset($_GET['limit']) ? intval($_GET['limit']) : 10;
+    $page = isset($_GET['page']) ? max(1, intval($_GET['page'])) : 1;
+    $limit_param = isset($_GET['limit']) ? trim((string) $_GET['limit']) : '20';
+    $is_all = ($limit_param === 'all');
+    $limit = $is_all ? 0 : intval($limit_param);
+    if (!$is_all && $limit <= 0) {
+        $limit = 20;
+    }
     $offset = ($page - 1) * $limit;
     $search = isset($_GET['search']) ? trim($_GET['search']) : '';
     $status = isset($_GET['status']) ? trim($_GET['status']) : '';
@@ -66,8 +71,11 @@ try {
                 created_at, updated_at
               FROM siswa
               WHERE $where_clause
-              ORDER BY created_at DESC
-              LIMIT $limit OFFSET $offset";
+              ORDER BY created_at DESC";
+
+    if (!$is_all) {
+        $query .= " LIMIT $limit OFFSET $offset";
+    }
 
     if (!empty($params)) {
         $stmt = $conn->prepare($query);
@@ -100,11 +108,12 @@ try {
     $response['success'] = true;
     $response['message'] = 'Data siswa berhasil diambil';
     $response['data'] = $data;
+    $effective_limit = $is_all ? ($total > 0 ? $total : 1) : $limit;
     $response['pagination'] = [
         'page' => $page,
-        'limit' => $limit,
+        'limit' => $is_all ? 'all' : $limit,
         'total' => $total,
-        'total_pages' => ceil($total / $limit)
+        'total_pages' => $is_all ? 1 : ceil($total / $effective_limit)
     ];
 
 } catch (Exception $e) {

@@ -111,6 +111,24 @@ if (!isset($_SESSION['logged_in']) || $_SESSION['logged_in'] !== true) {
                 <button id="btnSearch" class="button button-primary" style="padding: 10px 20px;">Cari</button>
             </div>
 
+            <!-- Table Controls -->
+            <div style="display: flex; justify-content: space-between; align-items: center; gap: 12px; margin-bottom: 12px; flex-wrap: wrap;">
+                <div style="display: flex; align-items: center; gap: 8px;">
+                    <label for="rowsPerPage" style="font-size: 14px; color: #333;">Tampilkan</label>
+                    <select id="rowsPerPage" style="padding: 8px;">
+                        <option value="20" selected>20</option>
+                        <option value="50">50</option>
+                        <option value="100">100</option>
+                        <option value="all">Semua</option>
+                    </select>
+                    <span style="font-size: 14px; color: #333;">baris</span>
+                </div>
+                <div style="display: flex; gap: 8px; flex-wrap: wrap;">
+                    <button id="btnCopyTable" class="button button-secondary" style="padding: 8px 12px;">Copy Tabel</button>
+                    <button id="btnExportExcel" class="button button-success" style="padding: 8px 12px;">Export Excel</button>
+                </div>
+            </div>
+
             <div id="loadingContainer" style="display: none;">
                 <div class="loading">
                     <div class="spinner"></div>
@@ -292,6 +310,8 @@ if (!isset($_SESSION['logged_in']) || $_SESSION['logged_in'] !== true) {
         let currentPage = 1;
         let currentSearch = '';
         let currentStatus = '';
+        let currentLimit = 20;
+        let lastLoadedData = [];
 
         // Logout handler
         document.getElementById('btnLogout').addEventListener('click', async function() {
@@ -509,6 +529,49 @@ if (!isset($_SESSION['logged_in']) || $_SESSION['logged_in'] !== true) {
             loadData();
         });
 
+        document.getElementById('rowsPerPage').addEventListener('change', function() {
+            currentPage = 1;
+            currentLimit = this.value === 'all' ? 'all' : parseInt(this.value, 10);
+            loadData();
+        });
+
+        document.getElementById('btnCopyTable').addEventListener('click', async function() {
+            if (!lastLoadedData.length) {
+                showAlert('Tidak ada data untuk disalin', 'error');
+                return;
+            }
+
+            const text = buildTabSeparatedData(lastLoadedData);
+
+            try {
+                if (navigator.clipboard && window.isSecureContext) {
+                    await navigator.clipboard.writeText(text);
+                } else {
+                    const textarea = document.createElement('textarea');
+                    textarea.value = text;
+                    textarea.style.position = 'fixed';
+                    textarea.style.left = '-9999px';
+                    document.body.appendChild(textarea);
+                    textarea.focus();
+                    textarea.select();
+                    document.execCommand('copy');
+                    document.body.removeChild(textarea);
+                }
+                showAlert('Tabel berhasil disalin ke clipboard', 'success');
+            } catch (error) {
+                showAlert('Gagal menyalin tabel: ' + error.message, 'error');
+            }
+        });
+
+        document.getElementById('btnExportExcel').addEventListener('click', function() {
+            if (!lastLoadedData.length) {
+                showAlert('Tidak ada data untuk diexport', 'error');
+                return;
+            }
+
+            exportCurrentViewToExcel(lastLoadedData);
+        });
+
         // Enter key on search
         document.getElementById('searchInput').addEventListener('keypress', function(e) {
             if (e.key === 'Enter') {
@@ -535,7 +598,7 @@ if (!isset($_SESSION['logged_in']) || $_SESSION['logged_in'] !== true) {
             try {
                 const params = new URLSearchParams({
                     page: currentPage,
-                    limit: 10,
+                    limit: currentLimit,
                     search: currentSearch,
                     status: currentStatus
                 });
@@ -546,12 +609,15 @@ if (!isset($_SESSION['logged_in']) || $_SESSION['logged_in'] !== true) {
                 if (loadingContainer) loadingContainer.style.display = 'none';
 
                 if (result.success) {
+                    lastLoadedData = Array.isArray(result.data) ? result.data : [];
+
                     if (result.data.length === 0) {
                         tableBody.innerHTML = '<tr><td colspan="7" style="text-align: center; padding: 20px;">Tidak ada data yang ditemukan</td></tr>';
                     } else {
                         let html = '';
                         result.data.forEach((siswa, index) => {
-                            const no = (currentPage - 1) * 10 + index + 1;
+                            const effectiveLimit = currentLimit === 'all' ? result.data.length : currentLimit;
+                            const no = (currentPage - 1) * effectiveLimit + index + 1;
                             
                             // Status verval badge
                             let statusBadge = siswa.verval_status === 'sudah' 
@@ -625,6 +691,96 @@ if (!isset($_SESSION['logged_in']) || $_SESSION['logged_in'] !== true) {
                 if (loadingContainer) loadingContainer.style.display = 'none';
                 showAlert('Terjadi kesalahan: ' + error.message, 'error');
             }
+        }
+
+        function buildTabSeparatedData(rows) {
+            const headers = ['No', 'NISN', 'Nama', 'Status', 'Perubahan', 'Scan Ijazah'];
+            const lines = [headers.join('\t')];
+
+            rows.forEach((siswa, index) => {
+                const effectiveLimit = currentLimit === 'all' ? rows.length : currentLimit;
+                const no = (currentPage - 1) * effectiveLimit + index + 1;
+                const nama = siswa.nama_kk || siswa.nama_ijazah || '-';
+                const status = siswa.verval_status === 'sudah' ? 'Sudah Verval' : 'Belum Verval';
+                const perubahan = getPerubahanTextById(siswa.id);
+                const scanIjazah = siswa.dokumen_ijazah ? 'Ada' : '-';
+
+                lines.push([
+                    no,
+                    sanitizeForExport(siswa.nisn),
+                    sanitizeForExport(nama),
+                    status,
+                    sanitizeForExport(perubahan),
+                    scanIjazah
+                ].join('\t'));
+            });
+
+            return lines.join('\n');
+        }
+
+        function getPerubahanTextById(siswaId) {
+            const changesCell = document.getElementById(`changes-${siswaId}`);
+            if (!changesCell) return '-';
+
+            const text = changesCell.textContent ? changesCell.textContent.trim() : '-';
+            return text || '-';
+        }
+
+        function sanitizeForExport(value) {
+            return String(value ?? '-')
+                .replace(/\r?\n/g, ' ')
+                .replace(/\t/g, ' ')
+                .trim();
+        }
+
+        function exportCurrentViewToExcel(rows) {
+            const headers = ['No', 'NISN', 'Nama', 'Status', 'Perubahan', 'Scan Ijazah'];
+            let html = '<table border="1"><thead><tr>';
+
+            headers.forEach(header => {
+                html += `<th>${header}</th>`;
+            });
+
+            html += '</tr></thead><tbody>';
+
+            rows.forEach((siswa, index) => {
+                const effectiveLimit = currentLimit === 'all' ? rows.length : currentLimit;
+                const no = (currentPage - 1) * effectiveLimit + index + 1;
+                const nama = siswa.nama_kk || siswa.nama_ijazah || '-';
+                const status = siswa.verval_status === 'sudah' ? 'Sudah Verval' : 'Belum Verval';
+                const perubahan = getPerubahanTextById(siswa.id);
+                const scanIjazah = siswa.dokumen_ijazah ? 'Ada' : '-';
+
+                html += '<tr>' +
+                    `<td>${no}</td>` +
+                    `<td>${escapeHtmlForExcel(sanitizeForExport(siswa.nisn))}</td>` +
+                    `<td>${escapeHtmlForExcel(sanitizeForExport(nama))}</td>` +
+                    `<td>${status}</td>` +
+                    `<td>${escapeHtmlForExcel(sanitizeForExport(perubahan))}</td>` +
+                    `<td>${scanIjazah}</td>` +
+                    '</tr>';
+            });
+
+            html += '</tbody></table>';
+
+            const blob = new Blob(['\ufeff' + html], { type: 'application/vnd.ms-excel;charset=utf-8;' });
+            const url = URL.createObjectURL(blob);
+            const link = document.createElement('a');
+            link.href = url;
+            link.download = `daftar-siswa-${new Date().toISOString().slice(0, 10)}.xls`;
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+            URL.revokeObjectURL(url);
+        }
+
+        function escapeHtmlForExcel(value) {
+            return String(value)
+                .replace(/&/g, '&amp;')
+                .replace(/</g, '&lt;')
+                .replace(/>/g, '&gt;')
+                .replace(/"/g, '&quot;')
+                .replace(/'/g, '&#39;');
         }
 
         async function loadChanges(siswaId) {
